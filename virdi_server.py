@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-#@PydevCodeAnalysisIgnore
-from thread import *
-from models import vd_comms
+
 import sys
 import socket
 import binascii
+from thread import start_new_thread
+from models import vd_comms
 
 
 def definition():
@@ -14,7 +14,10 @@ def definition():
     HOST = '172.19.254.11'
     PORT = 9870
     a = HOST.split('.')
-    server = '0x{:02x}'.format(int(a[3], 10)) + '0x{:02x}'.format(int(a[2], 10)) + '0x{:02x}'.format(int(a[1], 10)) + '0x{:02x}'.format(int(a[0], 10))
+    server = ('0x{:02x}'.format(int(a[3], 10)) +
+              '0x{:02x}'.format(int(a[2], 10)) +
+              '0x{:02x}'.format(int(a[1], 10)) +
+              '0x{:02x}'.format(int(a[0], 10)))
     server = server.replace('0x', '')
 
 if __name__ == '__main__':
@@ -49,16 +52,16 @@ def clientthread(conn):
 
         if not data:
             break
-        
+
         hex_data = binascii.hexlify(data).decode()
         print 'Recebendo Pacote'
         print 'Recebido: ', hex_data
         opt = hex_data[2:4]
         replay = vd_comms.options[opt](hex_data, server)
-        
-        if replay == None:
+
+        if replay is None:
             break
-        
+
         conn.sendall(replay)
     # came out of loop
     conn.close()
