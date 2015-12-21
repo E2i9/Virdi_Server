@@ -4,10 +4,6 @@ import binascii
 from datetime import datetime
 
 
-def calc_checksum(s):
-    return '%2X' % (-(sum(ord(c) for c in s) % 256) & 0xFF)
-
-
 def TIME_INFO():
     a = datetime.strftime(datetime.now(), '%Y.%m.%d.%H.%M.%S')
     b = a.split('.')
