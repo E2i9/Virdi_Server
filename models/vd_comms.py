@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import binascii
 from . import vd_packs
-
+from . import vd_dbconn
 
 def comTerminalLogon(hex_data, server):
-    print "Logon do Terminal (Terminal -> Servidor) 0x01"
+    print "Logon do Terminal \
+    (Terminal -> Servidor) 0x01"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -26,7 +28,8 @@ def comTerminalLogon(hex_data, server):
 
 
 def comTerminalLogoff(hex_data, server):
-    print "Logoff do Terminal (Terminal -> Servidor) 0x02"
+    print "Logoff do Terminal \
+    (Terminal -> Servidor) 0x02"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -38,7 +41,8 @@ def comTerminalLogoff(hex_data, server):
 
 
 def comTCardSerialNReading(hex_data, server):
-    print "Leitura do número de Série do Cartão (Terminal -> Servidor) 0x06"
+    print "Leitura do número de Série do Cartão \
+    (Terminal -> Servidor) 0x06"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -49,7 +53,8 @@ def comTCardSerialNReading(hex_data, server):
 
 
 def comTimeSync(hex_data, server):
-    print "Sincronismo de Hora (Terminal -> Servidor) 0x09"
+    print "Sincronismo de Hora \
+    (Terminal -> Servidor) 0x09"
     """
     Rotina para envio de pacote de Sincronismo de Hora do Terminal
     (Terminal -> Servidor) código do comando 0x09
@@ -72,7 +77,8 @@ def comTimeSync(hex_data, server):
 
 
 def comSendingTerminalStatus(hex_data, server):
-    print "Enviando Status do Terminal (Terminal -> Servidor) 0x0a"
+    print "Enviando Status do Terminal \
+    (Terminal -> Servidor) 0x0a"
     """
     Rotina para envio de pacote de Solicitação de Status do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -95,7 +101,8 @@ def comSendingTerminalStatus(hex_data, server):
 
 
 def comSendingAuthResult(hex_data, server):
-    print "Enviando Resultado da Autenticação (Terminal -> Servidor) 0x13"
+    print "Enviando Resultado da Autenticação \
+    (Terminal -> Servidor) 0x13"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -106,7 +113,8 @@ def comSendingAuthResult(hex_data, server):
 
 
 def comCheckUserDuplication(hex_data, server):
-    print "Verificando duplicidade de usuário (Terminal -> Servidor) 0x29"
+    print "Verificando duplicidade de usuário \
+    (Terminal -> Servidor) 0x29"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -117,7 +125,8 @@ def comCheckUserDuplication(hex_data, server):
 
 
 def comBringMealDataSum(hex_data, server):
-    print "Buscando informação sobre refeições (Terminal -> Servidor) 0x34"
+    print "Buscando informação sobre refeições \
+    (Terminal -> Servidor) 0x34"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -128,7 +137,8 @@ def comBringMealDataSum(hex_data, server):
 
 
 def comBringAntipassBackInfo(hex_data, server):
-    print "Buscando informação de Antipass Back (Terminal -> Servidor) 0x1a"
+    print "Buscando informação de Antipass Back \
+    (Terminal -> Servidor) 0x1a"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -139,7 +149,8 @@ def comBringAntipassBackInfo(hex_data, server):
 
 
 def comBringUserAuthInfo(hex_data, server):
-    print "Buscando informação de autenticação de usuário (Terminal -> Servidor) 0x1b"
+    print 'Buscando informação de autenticação de usuário \
+    (Terminal -> Servidor) 0x1b'
     """
     Rotina para envio de pacote de autenticação do usuário
     (Terminal -> Servidor) código do comando 0x1b
@@ -147,13 +158,19 @@ def comBringUserAuthInfo(hex_data, server):
     :Parameters: Pacote binário no formato Hexadecimal e o
     endereço IP do servidor
     """
+    tag = binascii.unhexlify(hex_data[64:]).decode()
+    veiculo = vd_dbconn.tagSearch(tag)
+    if not veiculo:
+        status = '0x0108000000000000'
+    else:
+        status = '0x0008000000000000'
     start = hex_data[0:2]
     command = hex_data[2:4]
     cid = hex_data[4:8]
     tid = hex_data[8:16]
     param1 = '0x00000000'
     param2 = '0x00000000'
-    param3 = '0x0008000000000000'
+    param3 = status
     errorcode = hex_data[48:56]
     extradata = '0x0800'
     data = vd_packs.TIME_INFO()
@@ -163,7 +180,8 @@ def comBringUserAuthInfo(hex_data, server):
 
 
 def comServerAuth(hex_data, server):
-    print "Autenticação no Servidor (Terminal -> Servidor) 0x1c"
+    print "Autenticação no Servidor \
+    (Terminal -> Servidor) 0x1c"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -174,7 +192,8 @@ def comServerAuth(hex_data, server):
 
 
 def comNCNOSignalAlarm(hex_data, server):
-    print "Sinal de alarme NC/NO (Terminal -> Servidor) 0x60"
+    print "Sinal de alarme NC/NO \
+    (Terminal -> Servidor) 0x60"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -185,7 +204,8 @@ def comNCNOSignalAlarm(hex_data, server):
 
 
 def comSettingTerminalOption(hex_data, server):
-    print "Definindo Opção no Terminal (Servidor -> Terminal) 0x05"
+    print "Definindo Opção no Terminal \
+    (Servidor -> Terminal) 0x05"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -196,7 +216,8 @@ def comSettingTerminalOption(hex_data, server):
 
 
 def comSCardSerialNReading(hex_data, server):
-    print "Leitura do número de Série do Cartão (Servidor -> Terminal) 0x07"
+    print "Leitura do número de Série do Cartão \
+    (Servidor -> Terminal) 0x07"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -207,7 +228,8 @@ def comSCardSerialNReading(hex_data, server):
 
 
 def comTerminalTimeSetting(hex_data, server):
-    print "Definindo a hora do Terminal (Servidor -> Terminal) 0x08"
+    print "Definindo a hora do Terminal \
+    (Servidor -> Terminal) 0x08"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -218,7 +240,8 @@ def comTerminalTimeSetting(hex_data, server):
 
 
 def comForceOpenTerminalLock(hex_data, server):
-    print "Abertura forçada da trava associada ao terminal (Servidor -> Terminal) 0x0c"
+    print "Abertura forçada da trava associada ao terminal \
+    (Servidor -> Terminal) 0x0c"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -229,7 +252,8 @@ def comForceOpenTerminalLock(hex_data, server):
 
 
 def comControlTerminalPeripheralDevice(hex_data, server):
-    print "Controle do dispositivo periférico do terminal (Servidor -> Terminal) 0x0d"
+    print "Controle do dispositivo periférico do terminal \
+    (Servidor -> Terminal) 0x0d"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -240,7 +264,8 @@ def comControlTerminalPeripheralDevice(hex_data, server):
 
 
 def comBringTerminalAuthRecord(hex_data, server):
-    print "Buscando registro de autenticação do terminal (Servidor -> Terminal) 0x16"
+    print "Buscando registro de autenticação do terminal \
+    (Servidor -> Terminal) 0x16"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -251,7 +276,8 @@ def comBringTerminalAuthRecord(hex_data, server):
 
 
 def comBringTerminalAuditLog(hex_data, server):
-    print "Buscando o log de auditoria do terminal (Servidor -> Terminal) 0x17"
+    print "Buscando o log de auditoria do terminal \
+    (Servidor -> Terminal) 0x17"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -262,7 +288,8 @@ def comBringTerminalAuditLog(hex_data, server):
 
 
 def comUpgradeTerminalFirmware(hex_data, server):
-    print "Realizando Upgrade de Firmware no Terminal (Servidor -> Terminal) 0x20"
+    print "Realizando Upgrade de Firmware no Terminal \
+    (Servidor -> Terminal) 0x20"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -273,7 +300,8 @@ def comUpgradeTerminalFirmware(hex_data, server):
 
 
 def comBringTerminalFirmwareVersion(hex_data, server):
-    print "Buscando a Versão do Firmware do Terminal (Servidor -> Terminal) 0x21"
+    print "Buscando a Versão do Firmware do Terminal \
+    (Servidor -> Terminal) 0x21"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -284,7 +312,8 @@ def comBringTerminalFirmwareVersion(hex_data, server):
 
 
 def comTerminalUserSync(hex_data, server):
-    print "Realizando o sincronismo dos usuários no Terminal (Servidor -> Terminal) 0x27"
+    print "Realizando o sincronismo dos usuários no Terminal \
+    (Servidor -> Terminal) 0x27"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -295,7 +324,8 @@ def comTerminalUserSync(hex_data, server):
 
 
 def comSettingTerminalMealOption(hex_data, server):
-    print "Definindo as opções de refeição no terminal (Servidor -> Terminal) 0x33"
+    print "Definindo as opções de refeição no terminal \
+    (Servidor -> Terminal) 0x33"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -306,7 +336,8 @@ def comSettingTerminalMealOption(hex_data, server):
 
 
 def comShinsegyeTerminalMealUserManagement(hex_data, server):
-    print "Gerenciamento das refeições dos usuários no terminal,Shinsegye (Servidor -> Terminal) 0x35"
+    print "Gerenciamento das refeições dos usuários no terminal,Shinsegye \
+    (Servidor -> Terminal) 0x35"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -317,7 +348,8 @@ def comShinsegyeTerminalMealUserManagement(hex_data, server):
 
 
 def comTerminalMealUserManagement(hex_data, server):
-    print "Gerenciamento das refeições dos usuários no terminal (Servidor -> Terminal) 0x36"
+    print "Gerenciamento das refeições dos usuários no terminal \
+    (Servidor -> Terminal) 0x36"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -328,7 +360,8 @@ def comTerminalMealUserManagement(hex_data, server):
 
 
 def comSmartCardLayoutSetting(hex_data, server):
-    print "Definição do layout do SmartCard (Servidor -> Terminal) 0x40"
+    print "Definição do layout do SmartCard \
+    (Servidor -> Terminal) 0x40"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -339,7 +372,8 @@ def comSmartCardLayoutSetting(hex_data, server):
 
 
 def comWiegandCommunicationSetting(hex_data, server):
-    print "Definição da comunicação da porta Wiegand (Servidor -> Terminal) 0x41"
+    print "Definição da comunicação da porta Wiegand \
+    (Servidor -> Terminal) 0x41"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -350,7 +384,8 @@ def comWiegandCommunicationSetting(hex_data, server):
 
 
 def comTerminalAccessAuthoritySetting(hex_data, server):
-    print "Definição da hierarquia de acesso no terminal (Servidor -> Terminal) 0x42"
+    print "Definição da hierarquia de acesso no terminal \
+    (Servidor -> Terminal) 0x42"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -361,7 +396,8 @@ def comTerminalAccessAuthoritySetting(hex_data, server):
 
 
 def comEmergencyAlarmSetting(hex_data, server):
-    print "Definição do alarme de emergência (Servidor -> Terminal) 0x51"
+    print "Definição do alarme de emergência \
+    (Servidor -> Terminal) 0x51"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -372,7 +408,8 @@ def comEmergencyAlarmSetting(hex_data, server):
 
 
 def comAnnouncementMessageSending(hex_data, server):
-    print "Enviando mensagem pública aos terminais (Servidor -> Terminal) 0x53"
+    print "Enviando mensagem pública aos terminais \
+    (Servidor -> Terminal) 0x53"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
