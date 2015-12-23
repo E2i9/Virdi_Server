@@ -3,6 +3,7 @@ import binascii
 from . import vd_packs
 from . import vd_dbconn
 
+
 def comTerminalLogon(hex_data, server):
     print "Logon do Terminal \
     (Terminal -> Servidor) 0x01"
@@ -159,6 +160,7 @@ def comBringUserAuthInfo(hex_data, server):
     endereço IP do servidor
     """
     tag = binascii.unhexlify(hex_data[64:]).decode()
+    vd_dbconn.setVagas(tag)
     veiculo = vd_dbconn.tagSearch(tag)
     if not veiculo:
         status = '0x0108000000000000'
