@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+import binascii
 from . import vd_packs
-
+from . import vd_dbconn
 
 def comTerminalLogon(hex_data, server):
     print "Logon do Terminal \
@@ -157,13 +158,19 @@ def comBringUserAuthInfo(hex_data, server):
     :Parameters: Pacote binário no formato Hexadecimal e o
     endereço IP do servidor
     """
+    tag = binascii.unhexlify(hex_data[64:]).decode()
+    veiculo = vd_dbconn.tagSearch(tag)
+    if not veiculo:
+        status = '0x0108000000000000'
+    else:
+        status = '0x0008000000000000'
     start = hex_data[0:2]
     command = hex_data[2:4]
     cid = hex_data[4:8]
     tid = hex_data[8:16]
     param1 = '0x00000000'
     param2 = '0x00000000'
-    param3 = '0x0008000000000000'
+    param3 = status
     errorcode = hex_data[48:56]
     extradata = '0x0800'
     data = vd_packs.TIME_INFO()
