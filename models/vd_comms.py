@@ -160,12 +160,14 @@ def comBringUserAuthInfo(hex_data, server):
     endereço IP do servidor
     """
     tag = binascii.unhexlify(hex_data[64:]).decode()
-    vd_dbconn.setVagas(tag)
-    veiculo = vd_dbconn.tagSearch(tag)
-    if not veiculo:
-        status = '0x0108000000000000'
-    else:
+    print tag
+    x = hex_data[8:16]
+    tid = int("%s%s%s%s" % (x[6:8], x[4:6], x[2:4], x[0:2]), 16)
+    print tid
+    if (vd_dbconn.getAuth(tag, tid)):
         status = '0x0008000000000000'
+    else:
+        status = '0x0108000000000000'
     start = hex_data[0:2]
     command = hex_data[2:4]
     cid = hex_data[4:8]
