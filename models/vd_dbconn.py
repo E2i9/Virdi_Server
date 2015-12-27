@@ -60,7 +60,10 @@ def tagSearch(_tag_name):
             conn_pgs.execute("select id from occ_tag where name = (%s)\
                              and active = 't';", (_tag_name,))
             _tag_id = conn_pgs.fetchone()
-            return _tag_id
+            if _tag_id is None:
+                return False
+            else:
+                return _tag_id
 
 
 def getVeiculo(_tag_name):
@@ -68,12 +71,18 @@ def getVeiculo(_tag_name):
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
     _tag_id = tagSearch(_tag_name)
-    with psycopg2.connect(database="alpha", user="cezar") as conn_pg:
-        with conn_pg.cursor() as conn_pgs:
-            conn_pgs.execute("select name from occ_veiculos where tag_id = (%s)\
-                             and active = 't';", (_tag_id,))
-            _veiculo_name = conn_pgs.fetchone()
-            return True
+    if _tag_id is False:
+        return False
+    else:
+        with psycopg2.connect(database="alpha", user="cezar") as conn_pg:
+            with conn_pg.cursor() as conn_pgs:
+                conn_pgs.execute("select name from occ_veiculos where tag_id = (%s)\
+                                 and active = 't';", (_tag_id,))
+                _veiculo_name = conn_pgs.fetchone()
+                if _veiculo_name is None:
+                    return False
+                else:
+                    return True
 
 
 def getVagasDispo(_tag_id, _terminal_id):
