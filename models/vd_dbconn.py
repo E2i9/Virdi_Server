@@ -100,10 +100,19 @@ def getVagasDispo(_tag_id, _terminal_id):
                 return False
             else:
                 print 'Tipo', tipo
+                tipo = reduce(add, tipo)
             conn_pgs.execute("select morador_id from occ_veiculos where\
                              tag_id = (%s);", (_tag_id, ))
             morador_id = reduce(add, conn_pgs.fetchone())
-            print 'Morador_id:', morador_id
+
+            conn_pgs.execute("select name from occ_morador where id = (%s);",
+                             (morador_id, ))
+            morador = reduce(add, conn_pgs.fetchone())
+            print 'Morador:', morador
+            conn_pgs.execute("select name from occ_veiculos where\
+                             tag_id = (%s);", (_tag_id, ))
+            veiculo = reduce(add, conn_pgs.fetchone())
+            print 'Placa:', veiculo
             conn_pgs.execute("select total_vagas_moto from occ_morador where\
                              id = (%s);", (morador_id, ))
             total_vagas_moto = reduce(add, conn_pgs.fetchone())
@@ -163,10 +172,10 @@ def getVagasDispo(_tag_id, _terminal_id):
         if tipo == 'moto':
             print 'Tipo Moto'
             if dispo_vagas_moto == total_vagas_moto:
-                print 'Vagas = Total'
+                print 'Vagas = Total', (dispo_vagas_moto - total_vagas_moto)
                 return True
             else:
-                print 'Vagas != Total'
+                print 'Vagas != Total', (dispo_vagas_moto - total_vagas_moto)
                 dispo_vagas_moto += 1
                 with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
@@ -179,11 +188,11 @@ def getVagasDispo(_tag_id, _terminal_id):
 
         if tipo == 'carro':
             print 'Tipo Carro'
-            if dispo_vagas_carro == total_vagas_moto:
-                print 'Vagas = Total'
+            if dispo_vagas_carro == total_vagas_carro:
+                print 'Vagas = Total', (dispo_vagas_carro - total_vagas_carro)
                 return True
             else:
-                print 'Vagas != Total'
+                print 'Vagas != Total', (dispo_vagas_carro - total_vagas_carro)
                 dispo_vagas_carro += 1
                 with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:

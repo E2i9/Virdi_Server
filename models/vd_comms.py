@@ -130,8 +130,8 @@ def comTimeSync(hex_data, server):
 
 
 def comSendingTerminalStatus(hex_data, server):
-    print "Enviando Status do Terminal \
-    (Terminal -> Servidor) 0x0a"
+    # print "Enviando Status do Terminal \
+    # (Terminal -> Servidor) 0x0a"
     """
     Rotina para envio de pacote de Solicitação de Status do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -214,10 +214,10 @@ def comBringUserAuthInfo(hex_data, server):
     """
     GlobalCodes()
     tag = binascii.unhexlify(hex_data[64:]).decode()
-    print tag
+    print 'Tag:', tag
     x = hex_data[8:16]
     tid = int("%s%s%s%s" % (x[6:8], x[4:6], x[2:4], x[0:2]), 16)
-    print tid
+    print 'Terminal:', tid
     if (vd_dbconn.getAuth(tag, tid)):
         status = '0x0008000000000000'
         errorcode_hex = ERROR_0000
