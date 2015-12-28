@@ -4,7 +4,7 @@ def setTotalVagas():
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
-    with psycopg2.connect(database="alpha", user="cezar") as conn_pg:
+    with psycopg2.connect(database="reserva", user="cezar") as conn_pg:
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("select morador_id from occ_veiculos where \
                              active = 't';")
@@ -55,26 +55,26 @@ def tagSearch(_tag_name):
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
-    with psycopg2.connect(database="alpha", user="cezar") as conn_pg:
+    with psycopg2.connect(database="reserva", user="cezar") as conn_pg:
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("select id from occ_tag where name = (%s)\
                              and active = 't';", (_tag_name,))
             _tag_id = conn_pgs.fetchone()
+            print 'tagSearch _tag_id:', _tag_id
             if _tag_id is None:
                 return False
             else:
                 return _tag_id
 
 
-def getVeiculo(_tag_name):
+def getVeiculo(_tag_id):
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
-    _tag_id = tagSearch(_tag_name)
     if _tag_id is False:
         return False
     else:
-        with psycopg2.connect(database="alpha", user="cezar") as conn_pg:
+        with psycopg2.connect(database="reserva", user="cezar") as conn_pg:
             with conn_pg.cursor() as conn_pgs:
                 conn_pgs.execute("select name from occ_veiculos where tag_id = (%s)\
                                  and active = 't';", (_tag_id,))
@@ -91,15 +91,18 @@ def getVagasDispo(_tag_id, _terminal_id):
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
     setTotalVagas()
-    with psycopg2.connect(database="alpha", user="cezar") as conn_pg:
+    with psycopg2.connect(database="reserva", user="cezar") as conn_pg:
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("select tipo from occ_veiculos where\
                              tag_id = (%s);", (_tag_id, ))
             tipo = conn_pgs.fetchone()
-            print 'Tipo', tipo
+            if tipo is None:
+                return False
+            else:
+                print 'Tipo', tipo
             conn_pgs.execute("select morador_id from occ_veiculos where\
                              tag_id = (%s);", (_tag_id, ))
-            morador_id = conn_pgs.fetchone()
+            morador_id = reduce(add, conn_pgs.fetchone())
             print 'Morador_id:', morador_id
             conn_pgs.execute("select total_vagas_moto from occ_morador where\
                              id = (%s);", (morador_id, ))
@@ -132,7 +135,7 @@ def getVagasDispo(_tag_id, _terminal_id):
                 return False
             else:
                 dispo_vagas_moto -= 1
-                with psycopg2.connect(database="alpha",
+                with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
                         conn_pgs.execute("update occ_morador SET \
@@ -146,7 +149,7 @@ def getVagasDispo(_tag_id, _terminal_id):
                 return False
             else:
                 dispo_vagas_carro -= 1
-                with psycopg2.connect(database="alpha",
+                with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
                         conn_pgs.execute("update occ_morador SET \
@@ -158,11 +161,14 @@ def getVagasDispo(_tag_id, _terminal_id):
     if _terminal_id == 2:
         print 'Terminal', _terminal_id
         if tipo == 'moto':
+            print 'Tipo Moto'
             if dispo_vagas_moto == total_vagas_moto:
+                print 'Vagas = Total'
                 return True
             else:
+                print 'Vagas != Total'
                 dispo_vagas_moto += 1
-                with psycopg2.connect(database="alpha",
+                with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
                         conn_pgs.execute("update occ_morador SET \
@@ -172,11 +178,14 @@ def getVagasDispo(_tag_id, _terminal_id):
                 return True
 
         if tipo == 'carro':
+            print 'Tipo Carro'
             if dispo_vagas_carro == total_vagas_moto:
+                print 'Vagas = Total'
                 return True
             else:
+                print 'Vagas != Total'
                 dispo_vagas_carro += 1
-                with psycopg2.connect(database="alpha",
+                with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
                         conn_pgs.execute("update occ_morador SET \
@@ -191,10 +200,14 @@ def getAuth(_tag_name, _terminal_id):
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
     _tag_id = tagSearch(_tag_name)
-    auth = getVeiculo(_tag_name)
-    vaga = getVagasDispo(_tag_id, _terminal_id)
-    print auth
-    print vaga
+    if _tag_id is False:
+        return False
+    else:
+        print 'getAuth _tag_id', _tag_id
+        auth = getVeiculo(_tag_id)
+        vaga = getVagasDispo(_tag_id, _terminal_id)
+        print 'Auth:', auth
+        print 'Vaga:', vaga
     if auth and vaga:
         return True
     else:

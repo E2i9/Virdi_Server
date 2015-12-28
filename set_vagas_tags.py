@@ -3,7 +3,7 @@ from operator import add
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
 
-with psycopg2.connect(database="alpha", user="cezar") as conn_pg:
+with psycopg2.connect(database="reserva", user="cezar") as conn_pg:
     with conn_pg.cursor() as conn_pgs:
         conn_pgs.execute("select tag_id from occ_veiculos where active = 't';")
         _tag_ids = conn_pgs.fetchall()
