@@ -60,7 +60,6 @@ def tagSearch(_tag_name):
             conn_pgs.execute("select id from occ_tag where name = (%s)\
                              and active = 't';", (_tag_name,))
             _tag_id = conn_pgs.fetchone()
-            print 'tagSearch _tag_id:', _tag_id
             if _tag_id is None:
                 return False
             else:
@@ -99,37 +98,30 @@ def getVagasDispo(_tag_id, _terminal_id):
             if tipo is None:
                 return False
             else:
-                print 'Tipo', tipo
                 tipo = reduce(add, tipo)
             conn_pgs.execute("select morador_id from occ_veiculos where\
                              tag_id = (%s);", (_tag_id, ))
             morador_id = reduce(add, conn_pgs.fetchone())
-
             conn_pgs.execute("select name from occ_morador where id = (%s);",
                              (morador_id, ))
             morador = reduce(add, conn_pgs.fetchone())
-            print 'Morador:', morador
             conn_pgs.execute("select name from occ_veiculos where\
                              tag_id = (%s);", (_tag_id, ))
             veiculo = reduce(add, conn_pgs.fetchone())
-            print 'Placa:', veiculo
             conn_pgs.execute("select total_vagas_moto from occ_morador where\
                              id = (%s);", (morador_id, ))
             total_vagas_moto = reduce(add, conn_pgs.fetchone())
-            print 'Total moto', total_vagas_moto
             conn_pgs.execute("select total_vagas_carro from occ_morador where\
                              id = (%s);", (morador_id, ))
             total_vagas_carro = reduce(add, conn_pgs.fetchone())
-            print 'Total carro', total_vagas_carro
             conn_pgs.execute("select dispo_vagas_moto from occ_morador where\
                              id = (%s);", (morador_id, ))
             dispo_vagas_moto = reduce(add, conn_pgs.fetchone())
-            print 'Dispo moto', dispo_vagas_moto
             conn_pgs.execute("select dispo_vagas_carro from occ_morador where\
                              id = (%s);", (morador_id, ))
             dispo_vagas_carro = reduce(add, conn_pgs.fetchone())
-            print 'Dispo carro', dispo_vagas_carro
-
+            print '\nMorador', morador
+            print 'Placa', veiculo
     if dispo_vagas_moto > total_vagas_moto:
         dispo_vagas_moto = total_vagas_moto
 
@@ -137,13 +129,14 @@ def getVagasDispo(_tag_id, _terminal_id):
         dispo_vagas_carro = total_vagas_carro
 
     if _terminal_id == 1:
-        print 'Terminal', _terminal_id
+        print 'Portão de Entrada'
         if tipo == 'moto':
-            print 'Tipo Moto'
             if dispo_vagas_moto == 0:
                 return False
             else:
                 dispo_vagas_moto -= 1
+                print ("Dispo vaga moto", dispo_vagas_moto + 1, "->",
+                       dispo_vagas_carro)
                 with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
@@ -151,13 +144,16 @@ def getVagasDispo(_tag_id, _terminal_id):
                                          dispo_vagas_moto = (%s) \
                                          where id = (%s);",
                                          (dispo_vagas_moto, morador_id))
+                        conn_pgs.execute("update occ_veiculos SET status = 'vaga' \
+                                         where tag_id = (%s);", (_tag_id, ))
                 return True
         if tipo == 'carro':
-            print 'Tipo Carro'
             if dispo_vagas_carro == 0:
                 return False
             else:
                 dispo_vagas_carro -= 1
+                print ("Dispo vaga carro", dispo_vagas_carro + 1, "->",
+                       dispo_vagas_carro)
                 with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
@@ -165,18 +161,25 @@ def getVagasDispo(_tag_id, _terminal_id):
                                          dispo_vagas_carro = (%s) \
                                          where id = (%s);",
                                          (dispo_vagas_carro, morador_id))
+                        conn_pgs.execute("update occ_veiculos SET status = 'vaga' \
+                                         where tag_id = (%s);", (_tag_id, ))
                 return True
 
     if _terminal_id == 2:
-        print 'Terminal', _terminal_id
+        print 'Portão de saída'
         if tipo == 'moto':
-            print 'Tipo Moto'
             if dispo_vagas_moto == total_vagas_moto:
                 print 'Vagas = Total', (dispo_vagas_moto - total_vagas_moto)
+                with psycopg2.connect(database="reserva",
+                                      user="cezar") as conn_pg:
+                    with conn_pg.cursor() as conn_pgs:
+                        conn_pgs.execute("update occ_veiculos SET status = 'fora' \
+                                         where tag_id = (%s);", (_tag_id, ))
                 return True
             else:
-                print 'Vagas != Total', (dispo_vagas_moto - total_vagas_moto)
                 dispo_vagas_moto += 1
+                print ("Dispo vaga moto", dispo_vagas_moto - 1, "->",
+                       dispo_vagas_moto)
                 with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
@@ -184,16 +187,23 @@ def getVagasDispo(_tag_id, _terminal_id):
                                          dispo_vagas_moto = (%s) \
                                          where id = (%s);",
                                          (dispo_vagas_moto, morador_id))
+                        conn_pgs.execute("update occ_veiculos SET status = 'fora' \
+                                         where tag_id = (%s);", (_tag_id, ))
+
                 return True
 
         if tipo == 'carro':
-            print 'Tipo Carro'
             if dispo_vagas_carro == total_vagas_carro:
-                print 'Vagas = Total', (dispo_vagas_carro - total_vagas_carro)
+                with psycopg2.connect(database="reserva",
+                                      user="cezar") as conn_pg:
+                    with conn_pg.cursor() as conn_pgs:
+                        conn_pgs.execute("update occ_veiculos SET status = 'fora' \
+                                         where tag_id = (%s);", (_tag_id, ))
                 return True
             else:
-                print 'Vagas != Total', (dispo_vagas_carro - total_vagas_carro)
                 dispo_vagas_carro += 1
+                print ("Dispo vaga carro", dispo_vagas_carro - 1, "->",
+                       dispo_vagas_carro)
                 with psycopg2.connect(database="reserva",
                                       user="cezar") as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
@@ -201,6 +211,8 @@ def getVagasDispo(_tag_id, _terminal_id):
                                          dispo_vagas_carro = (%s) \
                                          where id = (%s);",
                                          (dispo_vagas_carro, morador_id))
+                        conn_pgs.execute("update occ_veiculos SET status = 'fora' \
+                                         where tag_id = (%s);", (_tag_id, ))
                 return True
 
 
@@ -212,7 +224,7 @@ def getAuth(_tag_name, _terminal_id):
     if _tag_id is False:
         return False
     else:
-        print 'getAuth _tag_id', _tag_id
+        print 'TAG', _tag_id
         auth = getVeiculo(_tag_id)
         vaga = getVagasDispo(_tag_id, _terminal_id)
         print 'Auth:', auth

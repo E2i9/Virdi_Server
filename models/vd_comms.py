@@ -214,10 +214,8 @@ def comBringUserAuthInfo(hex_data, server):
     """
     GlobalCodes()
     tag = binascii.unhexlify(hex_data[64:]).decode()
-    print 'Tag:', tag
     x = hex_data[8:16]
     tid = int("%s%s%s%s" % (x[6:8], x[4:6], x[2:4], x[0:2]), 16)
-    print 'Terminal:', tid
     if (vd_dbconn.getAuth(tag, tid)):
         status = '0x0008000000000000'
         errorcode_hex = ERROR_0000
@@ -299,16 +297,29 @@ def comTerminalTimeSetting(hex_data, server):
     """
 
 
-def comForceOpenTerminalLock(hex_data, server):
+def comForceOpenTerminalLock(_terminal_id):
     print "Abertura forçada da trava associada ao terminal \
     (Servidor -> Terminal) 0x0c"
     """
-    Rotina para envio de pacote de Logon do Terminal
-    (Terminal -> Servidor) código do comando 0x01
+    Rotina para envio de pacote de abertura da tranca do terminal
+    (Servidor -> Terminal) código do comando 0x0c
     :Return: Datagrama para envio pelo servidor
     :Parameters: Pacote binário no formato Hexadecimal e o
     endereço IP do servidor
     """
+    GlobalCodes()
+    start = '0x21'
+    command = '0x0c'
+    cid = '0x0000'
+    tid = _terminal_id
+    param1 = '0x00000000'
+    param2 = '0x00000000'
+    param3 = '0x0000000000000000'
+    errorcode = ERROR_0000
+    extradata = '0x0000'
+    replay = vd_packs.comPackC01(start, command, cid, tid, param1, param2,
+                                 param3, errorcode, extradata)
+    return replay
 
 
 def comControlTerminalPeripheralDevice(hex_data, server):

@@ -20,11 +20,13 @@ def definition():
               '0x{:02x}'.format(int(a[0], 10)))
     server = server.replace('0x', '')
 
+
 if __name__ == '__main__':
     definition()
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 print 'Socket created'
 
 # Bind socket to local host and port
@@ -45,33 +47,28 @@ print 'Socket now listening'
 def clientthread(conn):
     # infinite loop so that function do not terminate and thread do not end.
     while True:
-
-        # Receiving from client
-        global data, hex_data
-        data = conn.recv(4096)
-
-        if not data:
+        try:
+            # Receiving from client
+            global data, hex_data
+            data = conn.recv(4096)
+            if not data:
+                break
+            hex_data = binascii.hexlify(data).decode()
+            opt = hex_data[2:4]
+            replay = vd_comms.options[opt](hex_data, server)
+            if replay is None:
+                break
+            conn.sendall(replay)
+        except KeyboardInterrupt:
             break
-
-        hex_data = binascii.hexlify(data).decode()
-        opt = hex_data[2:4]
-        replay = vd_comms.options[opt](hex_data, server)
-
-        if replay is None:
-            break
-
-        conn.sendall(replay)
     # came out of loop
     conn.close()
-
 # now keep talking with the client
 while 1:
     # wait to accept a connection - blocking call
     conn, addr = s.accept()
     print 'Connected with ' + addr[0] + ':' + str(addr[1])
-
     # start new thread takes 1st argument as a function name to be run,
     # second is the tuple of arguments to the function.
     start_new_thread(clientthread, (conn, ))
-
 s.close()
