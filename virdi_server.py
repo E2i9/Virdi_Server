@@ -54,8 +54,6 @@ def clientthread(conn):
             break
 
         hex_data = binascii.hexlify(data).decode()
-        print 'Recebendo Pacote'
-        print 'Recebido: ', hex_data
         opt = hex_data[2:4]
         replay = vd_comms.options[opt](hex_data, server)
 

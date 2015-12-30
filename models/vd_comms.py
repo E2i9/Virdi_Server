@@ -4,6 +4,56 @@ from . import vd_packs
 from . import vd_dbconn
 
 
+def GlobalCodes():
+    global ERROR_0000
+    global ERROR_1020
+    global ERROR_1022
+    global ERROR_1030
+    global ERROR_2003
+    global ERROR_3001
+    global ERROR_3002
+    global ERROR_3004
+    global ERROR_3005
+    global ERROR_3006
+    global ERROR_3007
+    global ERROR_4000
+    global ERROR_5001
+    global ERROR_5002
+    global ERROR_5003
+    global ERROR_5004
+    global ERROR_5005
+    global ERROR_5006
+    global ERROR_5007
+    global ERROR_6000
+    global ERROR_7006
+
+    ERROR_0000 = '0x30303030'
+    ERROR_1020 = '0x31303230'
+    ERROR_1022 = '0x31303232'
+    ERROR_1030 = '0x31303333'
+    ERROR_2003 = '0x32303033'
+    ERROR_3001 = '0x33303031'
+    ERROR_3002 = '0x33303032'
+    ERROR_3004 = '0x33303034'
+    ERROR_3005 = '0x33303035'
+    ERROR_3006 = '0x33303036'
+    ERROR_3007 = '0x33303037'
+    ERROR_4000 = '0x34303030'
+    ERROR_5001 = '0x35303031'
+    ERROR_5002 = '0x35303032'
+    ERROR_5003 = '0x35303033'
+    ERROR_5004 = '0x35303034'
+    ERROR_5005 = '0x35303035'
+    ERROR_5006 = '0x35303036'
+    ERROR_5007 = '0x35303037'
+    ERROR_6000 = '0x36303030'
+    ERROR_7006 = '0x37303036'
+
+
+if __name__ == '__main__':
+    GlobalCodes()
+
+
 def comTerminalLogon(hex_data, server):
     print "Logon do Terminal \
     (Terminal -> Servidor) 0x01"
@@ -14,6 +64,7 @@ def comTerminalLogon(hex_data, server):
     :Parameters: Pacote binário no formato Hexadecimal e o
     endereço IP do servidor
     """
+    GlobalCodes()
     start = hex_data[0:2]
     command = hex_data[2:4]
     cid = hex_data[4:8]
@@ -21,7 +72,7 @@ def comTerminalLogon(hex_data, server):
     param1 = server
     param2 = '0x0a000000'
     param3 = hex_data[40:44]+'000000000000'
-    errorcode = hex_data[48:56]
+    errorcode = ERROR_0000
     extradata = '0x0000'
     replay = vd_packs.comPackC01(start, command, cid, tid, param1, param2,
                                  param3, errorcode, extradata)
@@ -63,6 +114,7 @@ def comTimeSync(hex_data, server):
     :Parameters: Pacote binário no formato Hexadecimal e o
     endereço IP do servidor
     """
+    GlobalCodes()
     start = hex_data[0:2]
     command = hex_data[2:4]
     cid = hex_data[4:8]
@@ -70,7 +122,7 @@ def comTimeSync(hex_data, server):
     param1 = '0x00000000'
     param2 = '0x00000000'
     param3 = vd_packs.TIME_INFO()
-    errorcode = hex_data[48:56]
+    errorcode = ERROR_0000
     extradata = '0x0000'
     replay = vd_packs.comPackC01(start, command, cid, tid, param1, param2,
                                  param3, errorcode, extradata)
@@ -78,8 +130,8 @@ def comTimeSync(hex_data, server):
 
 
 def comSendingTerminalStatus(hex_data, server):
-    print "Enviando Status do Terminal \
-    (Terminal -> Servidor) 0x0a"
+    # print "Enviando Status do Terminal \
+    # (Terminal -> Servidor) 0x0a"
     """
     Rotina para envio de pacote de Solicitação de Status do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -87,6 +139,7 @@ def comSendingTerminalStatus(hex_data, server):
     :Parameters: Pacote binário no formato Hexadecimal e o
     endereço IP do servidor
     """
+    GlobalCodes()
     start = hex_data[0:2]
     command = hex_data[2:4]
     cid = hex_data[4:8]
@@ -94,7 +147,7 @@ def comSendingTerminalStatus(hex_data, server):
     param1 = '0x00000000'
     param2 = '0x00000000'
     param3 = vd_packs.TIME_INFO()
-    errorcode = hex_data[48:56]
+    errorcode = ERROR_0000
     extradata = '0x0000'
     replay = vd_packs.comPackC01(start, command, cid, tid, param1, param2,
                                  param3, errorcode, extradata)
@@ -159,15 +212,18 @@ def comBringUserAuthInfo(hex_data, server):
     :Parameters: Pacote binário no formato Hexadecimal e o
     endereço IP do servidor
     """
+    GlobalCodes()
     tag = binascii.unhexlify(hex_data[64:]).decode()
-    print tag
+    print 'Tag:', tag
     x = hex_data[8:16]
     tid = int("%s%s%s%s" % (x[6:8], x[4:6], x[2:4], x[0:2]), 16)
-    print tid
+    print 'Terminal:', tid
     if (vd_dbconn.getAuth(tag, tid)):
         status = '0x0008000000000000'
+        errorcode_hex = ERROR_0000
     else:
         status = '0x0108000000000000'
+        errorcode_hex = ERROR_3004
     start = hex_data[0:2]
     command = hex_data[2:4]
     cid = hex_data[4:8]
@@ -175,7 +231,7 @@ def comBringUserAuthInfo(hex_data, server):
     param1 = '0x00000000'
     param2 = '0x00000000'
     param3 = status
-    errorcode = hex_data[48:56]
+    errorcode = errorcode_hex
     extradata = '0x0800'
     data = vd_packs.TIME_INFO()
     replay = vd_packs.comPackC02(start, command, cid, tid, param1, param2,
