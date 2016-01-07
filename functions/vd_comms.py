@@ -54,9 +54,9 @@ if __name__ == '__main__':
     GlobalCodes()
 
 
-def comTerminalLogon(hex_data, server):
-    print "Logon do Terminal \
-    (Terminal -> Servidor) 0x01"
+def respTerminalLogon(hex_data):
+    # print "Logon do Terminal \
+    # (Terminal -> Servidor) 0x01"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -65,12 +65,19 @@ def comTerminalLogon(hex_data, server):
     endereço IP do servidor
     """
     GlobalCodes()
+    HOST = '172.19.254.11'
+    a = HOST.split('.')
+    server = ('0x{:02x}'.format(int(a[3], 10)) +
+              '0x{:02x}'.format(int(a[2], 10)) +
+              '0x{:02x}'.format(int(a[1], 10)) +
+              '0x{:02x}'.format(int(a[0], 10)))
+    server = server.replace('0x', '')
     start = hex_data[0:2]
     command = hex_data[2:4]
     cid = hex_data[4:8]
     tid = hex_data[8:16]
     param1 = server
-    param2 = '0x0a000000'
+    param2 = '0x01000000'
     param3 = hex_data[40:44]+'000000000000'
     errorcode = ERROR_0000
     extradata = '0x0000'
@@ -79,9 +86,9 @@ def comTerminalLogon(hex_data, server):
     return replay
 
 
-def comTerminalLogoff(hex_data, server):
-    print "Logoff do Terminal \
-    (Terminal -> Servidor) 0x02"
+def respTerminalLogoff(hex_data):
+    # print "Logoff do Terminal \
+    # (Terminal -> Servidor) 0x02"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -92,9 +99,9 @@ def comTerminalLogoff(hex_data, server):
     return None
 
 
-def comTCardSerialNReading(hex_data, server):
-    print "Leitura do número de Série do Cartão \
-    (Terminal -> Servidor) 0x06"
+def respTCardSerialNReading(hex_data):
+    # print "Leitura do número de Série do Cartão \
+    # (Terminal -> Servidor) 0x06"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -104,9 +111,9 @@ def comTCardSerialNReading(hex_data, server):
     """
 
 
-def comTimeSync(hex_data, server):
-    print "Sincronismo de Hora \
-    (Terminal -> Servidor) 0x09"
+def respTimeSync(hex_data):
+    # print "Sincronismo de Hora \
+    # (Terminal -> Servidor) 0x09"
     """
     Rotina para envio de pacote de Sincronismo de Hora do Terminal
     (Terminal -> Servidor) código do comando 0x09
@@ -129,7 +136,7 @@ def comTimeSync(hex_data, server):
     return replay
 
 
-def comSendingTerminalStatus(hex_data, server):
+def respSendingTerminalStatus(hex_data):
     # print "Enviando Status do Terminal \
     # (Terminal -> Servidor) 0x0a"
     """
@@ -154,9 +161,9 @@ def comSendingTerminalStatus(hex_data, server):
     return replay
 
 
-def comSendingAuthResult(hex_data, server):
-    print "Enviando Resultado da Autenticação \
-    (Terminal -> Servidor) 0x13"
+def respSendingAuthResult(hex_data):
+    # print "Enviando Resultado da Autenticação \
+    # (Terminal -> Servidor) 0x13"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -166,9 +173,9 @@ def comSendingAuthResult(hex_data, server):
     """
 
 
-def comCheckUserDuplication(hex_data, server):
-    print "Verificando duplicidade de usuário \
-    (Terminal -> Servidor) 0x29"
+def respCheckUserDuplication(hex_data):
+    # print "Verificando duplicidade de usuário \
+    # (Terminal -> Servidor) 0x29"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -178,9 +185,9 @@ def comCheckUserDuplication(hex_data, server):
     """
 
 
-def comBringMealDataSum(hex_data, server):
-    print "Buscando informação sobre refeições \
-    (Terminal -> Servidor) 0x34"
+def respBringMealDataSum(hex_data):
+    # print "Buscando informação sobre refeições \
+    # (Terminal -> Servidor) 0x34"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -190,9 +197,9 @@ def comBringMealDataSum(hex_data, server):
     """
 
 
-def comBringAntipassBackInfo(hex_data, server):
-    print "Buscando informação de Antipass Back \
-    (Terminal -> Servidor) 0x1a"
+def respBringAntipassBackInfo(hex_data):
+    # print "Buscando informação de Antipass Back \
+    # (Terminal -> Servidor) 0x1a"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -202,9 +209,9 @@ def comBringAntipassBackInfo(hex_data, server):
     """
 
 
-def comBringUserAuthInfo(hex_data, server):
-    print 'Buscando informação de autenticação de usuário \
-    (Terminal -> Servidor) 0x1b'
+def respBringUserAuthInfo(hex_data):
+    # print 'Buscando informação de autenticação de usuário \
+    # (Terminal -> Servidor) 0x1b'
     """
     Rotina para envio de pacote de autenticação do usuário
     (Terminal -> Servidor) código do comando 0x1b
@@ -214,10 +221,8 @@ def comBringUserAuthInfo(hex_data, server):
     """
     GlobalCodes()
     tag = binascii.unhexlify(hex_data[64:]).decode()
-    print 'Tag:', tag
     x = hex_data[8:16]
     tid = int("%s%s%s%s" % (x[6:8], x[4:6], x[2:4], x[0:2]), 16)
-    print 'Terminal:', tid
     if (vd_dbconn.getAuth(tag, tid)):
         status = '0x0008000000000000'
         errorcode_hex = ERROR_0000
@@ -239,9 +244,9 @@ def comBringUserAuthInfo(hex_data, server):
     return replay
 
 
-def comServerAuth(hex_data, server):
-    print "Autenticação no Servidor \
-    (Terminal -> Servidor) 0x1c"
+def respServerAuth(hex_data):
+    # print "Autenticação no Servidor \
+    # (Terminal -> Servidor) 0x1c"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -251,9 +256,9 @@ def comServerAuth(hex_data, server):
     """
 
 
-def comNCNOSignalAlarm(hex_data, server):
-    print "Sinal de alarme NC/NO \
-    (Terminal -> Servidor) 0x60"
+def respNCNOSignalAlarm(hex_data):
+    # print "Sinal de alarme NC/NO \
+    # (Terminal -> Servidor) 0x60"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -263,9 +268,9 @@ def comNCNOSignalAlarm(hex_data, server):
     """
 
 
-def comSettingTerminalOption(hex_data, server):
-    print "Definindo Opção no Terminal \
-    (Servidor -> Terminal) 0x05"
+def respSettingTerminalOption(hex_data):
+    # print "Definindo Opção no Terminal \
+    # (Servidor -> Terminal) 0x05"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -275,9 +280,9 @@ def comSettingTerminalOption(hex_data, server):
     """
 
 
-def comSCardSerialNReading(hex_data, server):
-    print "Leitura do número de Série do Cartão \
-    (Servidor -> Terminal) 0x07"
+def respSCardSerialNReading(hex_data):
+    # print "Leitura do número de Série do Cartão \
+    # (Servidor -> Terminal) 0x07"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -287,9 +292,9 @@ def comSCardSerialNReading(hex_data, server):
     """
 
 
-def comTerminalTimeSetting(hex_data, server):
-    print "Definindo a hora do Terminal \
-    (Servidor -> Terminal) 0x08"
+def respTerminalTimeSetting(hex_data):
+    # print "Definindo a hora do Terminal \
+    # (Servidor -> Terminal) 0x08"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -299,9 +304,21 @@ def comTerminalTimeSetting(hex_data, server):
     """
 
 
-def comForceOpenTerminalLock(hex_data, server):
-    print "Abertura forçada da trava associada ao terminal \
-    (Servidor -> Terminal) 0x0c"
+def respForceOpenTerminalLock(hex_data):
+    # print "Abertura forçada da trava associada ao terminal \
+    # (Servidor -> Terminal) 0x0c"
+    """
+    Rotina para envio de pacote de abertura da tranca do terminal
+    (Servidor -> Terminal) código do comando 0x0c
+    :Return: Datagrama para envio pelo servidor
+    :Parameters: Pacote binário no formato Hexadecimal e o
+    endereço IP do servidor
+    """
+
+
+def respControlTerminalPeripheralDevice(hex_data):
+    # print "Controle do dispositivo periférico do terminal \
+    # (Servidor -> Terminal) 0x0d"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -311,9 +328,9 @@ def comForceOpenTerminalLock(hex_data, server):
     """
 
 
-def comControlTerminalPeripheralDevice(hex_data, server):
-    print "Controle do dispositivo periférico do terminal \
-    (Servidor -> Terminal) 0x0d"
+def respBringTerminalAuthRecord(hex_data):
+    # print "Buscando registro de autenticação do terminal \
+    # (Servidor -> Terminal) 0x16"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -323,9 +340,9 @@ def comControlTerminalPeripheralDevice(hex_data, server):
     """
 
 
-def comBringTerminalAuthRecord(hex_data, server):
-    print "Buscando registro de autenticação do terminal \
-    (Servidor -> Terminal) 0x16"
+def respBringTerminalAuditLog(hex_data):
+    # print "Buscando o log de auditoria do terminal \
+    # (Servidor -> Terminal) 0x17"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -335,9 +352,9 @@ def comBringTerminalAuthRecord(hex_data, server):
     """
 
 
-def comBringTerminalAuditLog(hex_data, server):
-    print "Buscando o log de auditoria do terminal \
-    (Servidor -> Terminal) 0x17"
+def respUpgradeTerminalFirmware(hex_data):
+    # print "Realizando Upgrade de Firmware no Terminal \
+    # (Servidor -> Terminal) 0x20"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -347,9 +364,9 @@ def comBringTerminalAuditLog(hex_data, server):
     """
 
 
-def comUpgradeTerminalFirmware(hex_data, server):
-    print "Realizando Upgrade de Firmware no Terminal \
-    (Servidor -> Terminal) 0x20"
+def respBringTerminalFirmwareVersion(hex_data):
+    # print "Buscando a Versão do Firmware do Terminal \
+    # (Servidor -> Terminal) 0x21"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -359,9 +376,9 @@ def comUpgradeTerminalFirmware(hex_data, server):
     """
 
 
-def comBringTerminalFirmwareVersion(hex_data, server):
-    print "Buscando a Versão do Firmware do Terminal \
-    (Servidor -> Terminal) 0x21"
+def respTerminalUserSync(hex_data):
+    # print "Realizando o sincronismo dos usuários no Terminal \
+    # (Servidor -> Terminal) 0x27"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -371,9 +388,9 @@ def comBringTerminalFirmwareVersion(hex_data, server):
     """
 
 
-def comTerminalUserSync(hex_data, server):
-    print "Realizando o sincronismo dos usuários no Terminal \
-    (Servidor -> Terminal) 0x27"
+def respSettingTerminalMealOption(hex_data):
+    # print "Definindo as opções de refeição no terminal \
+    # (Servidor -> Terminal) 0x33"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -383,9 +400,9 @@ def comTerminalUserSync(hex_data, server):
     """
 
 
-def comSettingTerminalMealOption(hex_data, server):
-    print "Definindo as opções de refeição no terminal \
-    (Servidor -> Terminal) 0x33"
+def respShinsegyeTerminalMealUserManagement(hex_data):
+    # print "Gerenciamento das refeições dos usuários no terminal,Shinsegye \
+    # (Servidor -> Terminal) 0x35"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -395,9 +412,9 @@ def comSettingTerminalMealOption(hex_data, server):
     """
 
 
-def comShinsegyeTerminalMealUserManagement(hex_data, server):
-    print "Gerenciamento das refeições dos usuários no terminal,Shinsegye \
-    (Servidor -> Terminal) 0x35"
+def respTerminalMealUserManagement(hex_data):
+    # print "Gerenciamento das refeições dos usuários no terminal \
+    # (Servidor -> Terminal) 0x36"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -407,9 +424,9 @@ def comShinsegyeTerminalMealUserManagement(hex_data, server):
     """
 
 
-def comTerminalMealUserManagement(hex_data, server):
-    print "Gerenciamento das refeições dos usuários no terminal \
-    (Servidor -> Terminal) 0x36"
+def respSmartCardLayoutSetting(hex_data):
+    # print "Definição do layout do SmartCard \
+    # (Servidor -> Terminal) 0x40"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -419,9 +436,9 @@ def comTerminalMealUserManagement(hex_data, server):
     """
 
 
-def comSmartCardLayoutSetting(hex_data, server):
-    print "Definição do layout do SmartCard \
-    (Servidor -> Terminal) 0x40"
+def respWiegandCommunicationSetting(hex_data):
+    # print "Definição da comunicação da porta Wiegand \
+    # (Servidor -> Terminal) 0x41"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -431,9 +448,9 @@ def comSmartCardLayoutSetting(hex_data, server):
     """
 
 
-def comWiegandCommunicationSetting(hex_data, server):
-    print "Definição da comunicação da porta Wiegand \
-    (Servidor -> Terminal) 0x41"
+def respTerminalAccessAuthoritySetting(hex_data):
+    # print "Definição da hierarquia de acesso no terminal \
+    # (Servidor -> Terminal) 0x42"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -443,9 +460,9 @@ def comWiegandCommunicationSetting(hex_data, server):
     """
 
 
-def comTerminalAccessAuthoritySetting(hex_data, server):
-    print "Definição da hierarquia de acesso no terminal \
-    (Servidor -> Terminal) 0x42"
+def respEmergencyAlarmSetting(hex_data):
+    # print "Definição do alarme de emergência \
+    # (Servidor -> Terminal) 0x51"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -455,9 +472,9 @@ def comTerminalAccessAuthoritySetting(hex_data, server):
     """
 
 
-def comEmergencyAlarmSetting(hex_data, server):
-    print "Definição do alarme de emergência \
-    (Servidor -> Terminal) 0x51"
+def respAnnouncementMessageSending(hex_data):
+    # print "Enviando mensagem pública aos terminais \
+    # (Servidor -> Terminal) 0x53"
     """
     Rotina para envio de pacote de Logon do Terminal
     (Terminal -> Servidor) código do comando 0x01
@@ -467,47 +484,65 @@ def comEmergencyAlarmSetting(hex_data, server):
     """
 
 
-def comAnnouncementMessageSending(hex_data, server):
-    print "Enviando mensagem pública aos terminais \
-    (Servidor -> Terminal) 0x53"
+def setGateOpen(_terminal_id):
+    # print "Abertura forçada da trava associada ao terminal \
+    # (Servidor -> Terminal) 0x0c"
     """
-    Rotina para envio de pacote de Logon do Terminal
-    (Terminal -> Servidor) código do comando 0x01
+    Rotina para envio de pacote de abertura da tranca do terminal
+    (Servidor -> Terminal) código do comando 0x0c
     :Return: Datagrama para envio pelo servidor
     :Parameters: Pacote binário no formato Hexadecimal e o
     endereço IP do servidor
     """
+    GlobalCodes()
+    start = '0x21'
+    command = '0x0c'
+    cid = '0x0000'
+    tid0 = reduce(lambda x, y: x, str(_terminal_id[6:8] +
+                                      _terminal_id[4:6] +
+                                      _terminal_id[2:4] +
+                                      _terminal_id[0:2]))
+    print tid0
+    tid = '0x01000000'
+    param1 = '0x00000000'
+    param2 = '0x00000000'
+    param3 = '0x0000000000000000'
+    errorcode = ERROR_0000
+    extradata = '0x0000'
+    replay = vd_packs.comPackC01(start, command, cid, tid, param1, param2,
+                                 param3, errorcode, extradata)
+    return replay
 
 
 options = {
-           '01': comTerminalLogon,
-           '02': comTerminalLogoff,
-           '06': comTCardSerialNReading,
-           '09': comTimeSync,
-           '0a': comSendingTerminalStatus,
-           '13': comSendingAuthResult,
-           '29': comCheckUserDuplication,
-           '34': comBringMealDataSum,
-           '1a': comBringAntipassBackInfo,
-           '1b': comBringUserAuthInfo,
-           '1c': comServerAuth,
-           '60': comNCNOSignalAlarm,
-           '05': comSettingTerminalOption,
-           '07': comSCardSerialNReading,
-           '08': comTerminalTimeSetting,
-           '0c': comForceOpenTerminalLock,
-           '0d': comControlTerminalPeripheralDevice,
-           '16': comBringTerminalAuthRecord,
-           '17': comBringTerminalAuditLog,
-           '20': comUpgradeTerminalFirmware,
-           '21': comBringTerminalFirmwareVersion,
-           '27': comTerminalUserSync,
-           '33': comSettingTerminalMealOption,
-           '35': comShinsegyeTerminalMealUserManagement,
-           '36': comTerminalMealUserManagement,
-           '40': comSmartCardLayoutSetting,
-           '41': comWiegandCommunicationSetting,
-           '42': comTerminalAccessAuthoritySetting,
-           '51': comEmergencyAlarmSetting,
-           '53': comAnnouncementMessageSending,
+           '01': respTerminalLogon,
+           '02': respTerminalLogoff,
+           '06': respTCardSerialNReading,
+           '09': respTimeSync,
+           '0a': respSendingTerminalStatus,
+           '13': respSendingAuthResult,
+           '29': respCheckUserDuplication,
+           '34': respBringMealDataSum,
+           '1a': respBringAntipassBackInfo,
+           '1b': respBringUserAuthInfo,
+           '1c': respServerAuth,
+           '60': respNCNOSignalAlarm,
+           '05': respSettingTerminalOption,
+           '07': respSCardSerialNReading,
+           '08': respTerminalTimeSetting,
+           '0c': respForceOpenTerminalLock,
+           '0d': respControlTerminalPeripheralDevice,
+           '16': respBringTerminalAuthRecord,
+           '17': respBringTerminalAuditLog,
+           '20': respUpgradeTerminalFirmware,
+           '21': respBringTerminalFirmwareVersion,
+           '27': respTerminalUserSync,
+           '33': respSettingTerminalMealOption,
+           '35': respShinsegyeTerminalMealUserManagement,
+           '36': respTerminalMealUserManagement,
+           '40': respSmartCardLayoutSetting,
+           '41': respWiegandCommunicationSetting,
+           '42': respTerminalAccessAuthoritySetting,
+           '51': respEmergencyAlarmSetting,
+           '53': respAnnouncementMessageSending,
 }

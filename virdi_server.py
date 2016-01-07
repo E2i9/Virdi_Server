@@ -1,30 +1,16 @@
 # -*- coding: utf-8 -*-
-
 import sys
 import socket
 import binascii
 from thread import start_new_thread
-from models import vd_comms
+from functions import vd_comms
+from functions import vd_dbconn
 
 
-def definition():
-    global data, hex_data, HOST, PORT, server
-    data = None
-    hex_data = None
-    HOST = '172.19.254.11'
-    PORT = 9870
-    a = HOST.split('.')
-    server = ('0x{:02x}'.format(int(a[3], 10)) +
-              '0x{:02x}'.format(int(a[2], 10)) +
-              '0x{:02x}'.format(int(a[1], 10)) +
-              '0x{:02x}'.format(int(a[0], 10)))
-    server = server.replace('0x', '')
-
-if __name__ == '__main__':
-    definition()
-
-
+HOST = '172.19.254.11'
+PORT = 9870
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 print 'Socket created'
 
 # Bind socket to local host and port
@@ -37,41 +23,48 @@ except socket.error as msg:
 print 'Socket bind complete'
 
 # Start listening on socket
-s.listen(1)
+s.listen(3)
 print 'Socket now listening'
 
 
 # Function for handling connections. This will be used to create threads
-def clientthread(conn):
+def clientthread(conn, _addr, _port):
     # infinite loop so that function do not terminate and thread do not end.
     while True:
+        if vd_dbconn.getTerminalStatus(_addr) is False:
+            _tid = vd_dbconn.getTerminalID(_addr)
+            vd_dbconn.setTerminalStatus(_tid)
+            conn.sendall(vd_comms.setGateOpen(_tid))
 
-        # Receiving from client
-        global data, hex_data
-        data = conn.recv(4096)
+        try:
+            # Receiving from client
+            data = conn.recv(4096)
 
-        if not data:
+            if not data:
+                break
+
+            hex_data = binascii.hexlify(data).decode()
+            x = hex_data[8:16]
+            tid = str(x[6:8] + x[4:6] + x[2:4] + x[0:2])
+            vd_dbconn.setTerminal(tid, _addr, _port)
+
+            opt = hex_data[2:4]
+            replay = vd_comms.options[opt](hex_data)
+            if replay is not None:
+                conn.sendall(replay)
+
+        except KeyboardInterrupt:
             break
-
-        hex_data = binascii.hexlify(data).decode()
-        opt = hex_data[2:4]
-        replay = vd_comms.options[opt](hex_data, server)
-
-        if replay is None:
-            break
-
-        conn.sendall(replay)
     # came out of loop
     conn.close()
-
 # now keep talking with the client
 while 1:
     # wait to accept a connection - blocking call
     conn, addr = s.accept()
+    ip = addr[0]
+    port = str(addr[1])
     print 'Connected with ' + addr[0] + ':' + str(addr[1])
-
     # start new thread takes 1st argument as a function name to be run,
     # second is the tuple of arguments to the function.
-    start_new_thread(clientthread, (conn, ))
-
+    start_new_thread(clientthread, (conn, ip, port))
 s.close()
