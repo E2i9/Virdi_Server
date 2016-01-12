@@ -50,10 +50,6 @@ def GlobalCodes():
     ERROR_7006 = '0x37303036'
 
 
-if __name__ == '__main__':
-    GlobalCodes()
-
-
 def respTerminalLogon(hex_data):
     # print "Logon do Terminal \
     # (Terminal -> Servidor) 0x01"
@@ -546,3 +542,6 @@ options = {
            '51': respEmergencyAlarmSetting,
            '53': respAnnouncementMessageSending,
 }
+
+if __name__ == '__main__':
+    GlobalCodes()
