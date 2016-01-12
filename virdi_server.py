@@ -7,31 +7,11 @@ from functions import vd_comms
 from functions import vd_dbconn
 
 
-HOST = '172.19.254.11'
-PORT = 9870
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-print 'Socket created'
-
-# Bind socket to local host and port
-try:
-    s.bind((HOST, PORT))
-except socket.error as msg:
-    print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
-    sys.exit()
-
-print 'Socket bind complete'
-
-# Start listening on socket
-s.listen(3)
-print 'Socket now listening'
-
-
 # Function for handling connections. This will be used to create threads
 def clientthread(conn, _addr, _port):
     # infinite loop so that function do not terminate and thread do not end.
     while True:
-        if vd_dbconn.getTerminalStatus(_addr) is False:
+        if vd_dbconn.getTerminalStatus(_addr) == 'open':
             _tid = vd_dbconn.getTerminalID(_addr)
             vd_dbconn.setTerminalStatus(_tid)
             conn.sendall(vd_comms.setGateOpen(_tid))
@@ -44,11 +24,13 @@ def clientthread(conn, _addr, _port):
                 break
 
             hex_data = binascii.hexlify(data).decode()
-            x = hex_data[8:16]
-            tid = str(x[6:8] + x[4:6] + x[2:4] + x[0:2])
-            vd_dbconn.setTerminal(tid, _addr, _port)
-
             opt = hex_data[2:4]
+
+            if opt == '01':
+                x = hex_data[8:16]
+                tid = str(x[6:8] + x[4:6] + x[2:4] + x[0:2])
+                vd_dbconn.setTerminal(tid, _addr, _port)
+
             replay = vd_comms.options[opt](hex_data)
             if replay is not None:
                 conn.sendall(replay)
@@ -57,14 +39,33 @@ def clientthread(conn, _addr, _port):
             break
     # came out of loop
     conn.close()
-# now keep talking with the client
-while 1:
-    # wait to accept a connection - blocking call
-    conn, addr = s.accept()
-    ip = addr[0]
-    port = str(addr[1])
-    print 'Connected with ' + addr[0] + ':' + str(addr[1])
-    # start new thread takes 1st argument as a function name to be run,
-    # second is the tuple of arguments to the function.
-    start_new_thread(clientthread, (conn, ip, port))
-s.close()
+if __name__ == "__main__":
+    HOST = '172.19.254.11'
+    PORT = 9870
+    # now keep talking with the client
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    print 'Socket created'
+
+    # Bind socket to local host and port
+    try:
+        s.bind((HOST, PORT))
+    except socket.error as msg:
+        print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+        sys.exit()
+
+    print 'Socket bind complete'
+
+    # Start listening on socket
+    s.listen(3)
+    print 'Socket now listening'
+    while 1:
+        # wait to accept a connection - blocking call
+        conn, addr = s.accept()
+        ip = addr[0]
+        port = str(addr[1])
+        print 'Connected with ' + addr[0] + ':' + str(addr[1])
+        # start new thread takes 1st argument as a function name to be run,
+        # second is the tuple of arguments to the function.
+        start_new_thread(clientthread, (conn, ip, port))
+    s.close()
