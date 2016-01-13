@@ -278,7 +278,7 @@ def getAuth(_tag_name, _terminal_id):
         sentido = _sentido
         status_sentido = True
 
-    _dadosmorador = getDadosMorador(tag_id)
+    _dadosmorador = getDadosMorador(_tag_id)
     if _dadosmorador is False:
         status_morador = 'Morador não cadastrado'
     else:
