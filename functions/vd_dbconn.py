@@ -270,6 +270,29 @@ def getAuth(_tag_name, _terminal_id):
     else:
         tag_id = _tag_id
         status_tag = True
+        _dadosmorador = getDadosMorador(_tag_id)
+        if _dadosmorador is False:
+            status_morador = 'Morador não cadastrado'
+        else:
+            morador_id = _dadosmorador[0]
+            foto = _dadosmorador[1]
+            morador = _dadosmorador[2]
+            status_morador = True
+
+        _placa = getPlaca(tag_id)
+        if _placa is False:
+            status_placa = 'Veículo não cadastrado'
+        else:
+            placa = _placa
+            status_placa = True
+
+        _apto = getApto(tag_id)
+        if _apto is False:
+            status_apto = 'Apartamento não cadastrado'
+        else:
+            apto = _apto
+            status_apto = True
+        vaga = getVagasDispo(tag_id, morador_id, _terminal_id)
 
     _sentido = getSentido(_terminal_id)
     if _sentido is False:
@@ -277,31 +300,6 @@ def getAuth(_tag_name, _terminal_id):
     else:
         sentido = _sentido
         status_sentido = True
-
-    _dadosmorador = getDadosMorador(_tag_id)
-    if _dadosmorador is False:
-        status_morador = 'Morador não cadastrado'
-    else:
-        morador_id = _dadosmorador[0]
-        foto = _dadosmorador[1]
-        morador = _dadosmorador[2]
-        status_morador = True
-
-    _placa = getPlaca(tag_id)
-    if _placa is False:
-        status_placa = 'Veículo não cadastrado'
-    else:
-        placa = _placa
-        status_placa = True
-
-    _apto = getApto(tag_id)
-    if _apto is False:
-        status_apto = 'Apartamento não cadastrado'
-    else:
-        apto = _apto
-        status_apto = True
-
-    vaga = getVagasDispo(tag_id, morador_id, _terminal_id)
 
     if ((status_tag and status_sentido and status_morador and
          status_placa and status_apto and vaga)):
