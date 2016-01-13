@@ -11,10 +11,6 @@ from functions import vd_dbconn
 def clientthread(conn, _addr, _port):
     # infinite loop so that function do not terminate and thread do not end.
     while True:
-        if vd_dbconn.getTerminalStatus(_addr) == 'open':
-            _tid = vd_dbconn.getTerminalID(_addr)
-            vd_dbconn.setTerminalStatus(_tid)
-            conn.sendall(vd_comms.setGateOpen(_tid))
 
         try:
             # Receiving from client
@@ -30,6 +26,11 @@ def clientthread(conn, _addr, _port):
                 x = hex_data[8:16]
                 tid = str(x[6:8] + x[4:6] + x[2:4] + x[0:2])
                 vd_dbconn.setTerminal(tid, _addr, _port)
+
+            if vd_dbconn.getTerminalStatus(_addr) == 'open':
+                _tid = vd_dbconn.getTerminalID(_addr)
+                vd_dbconn.setTerminalStatus(_tid)
+                conn.sendall(vd_comms.setGateOpen(_tid))
 
             replay = vd_comms.options[opt](hex_data)
             if replay is not None:
