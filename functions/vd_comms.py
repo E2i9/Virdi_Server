@@ -218,7 +218,7 @@ def respBringUserAuthInfo(hex_data):
     GlobalCodes()
     tag = binascii.unhexlify(hex_data[64:]).decode()
     x = hex_data[8:16]
-    tid = int("%s%s%s%s" % (x[6:8], x[4:6], x[2:4], x[0:2]), 16)
+    tid = '{}{}{}{}'.format(x[6:8], x[4:6], x[2:4], x[0:2])
     if (vd_dbconn.getAuth(tag, tid)):
         status = '0x0008000000000000'
         errorcode_hex = ERROR_0000
