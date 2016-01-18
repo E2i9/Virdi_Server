@@ -498,7 +498,6 @@ def setGateOpen(_terminal_id):
               _terminal_id[4:6] +
               _terminal_id[2:4] +
               _terminal_id[0:2])
-    #tid = '010000001'
     param1 = '0x00000000'
     param2 = '0x00000000'
     param3 = '0x0000000000000000'
