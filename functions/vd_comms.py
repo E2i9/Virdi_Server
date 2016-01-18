@@ -494,12 +494,11 @@ def setGateOpen(_terminal_id):
     start = '0x21'
     command = '0x0c'
     cid = '0x0000'
-    tid0 = reduce(lambda x, y: x, str(_terminal_id[6:8] +
-                                      _terminal_id[4:6] +
-                                      _terminal_id[2:4] +
-                                      _terminal_id[0:2]))
-    print tid0
-    tid = '0x01000000'
+    tid = str(_terminal_id[6:8] +
+              _terminal_id[4:6] +
+              _terminal_id[2:4] +
+              _terminal_id[0:2])
+    #tid = '010000001'
     param1 = '0x00000000'
     param2 = '0x00000000'
     param3 = '0x0000000000000000'

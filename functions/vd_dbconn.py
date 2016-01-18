@@ -2,7 +2,7 @@
 from datetime import datetime
 global db_name, db_user
 db_name = "reserva"
-db_user = "cezar"
+db_user = "e2i9"
 
 
 def setTotalVagas():
@@ -71,8 +71,8 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
                 return False
             else:
                 tipo = reduce(add, tipo)
-            conn_pgs.execute("select name from occ_morador where id = (%s);",
-                             (_morador_id, ))
+            conn_pgs.execute("select total_vagas_moto from occ_morador where\
+                             id = (%s);", (_morador_id, ))
             total_vagas_moto = reduce(add, conn_pgs.fetchone())
             conn_pgs.execute("select total_vagas_carro from occ_morador where\
                              id = (%s);", (_morador_id, ))
@@ -83,6 +83,7 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
             conn_pgs.execute("select dispo_vagas_carro from occ_morador where\
                              id = (%s);", (_morador_id, ))
             dispo_vagas_carro = reduce(add, conn_pgs.fetchone())
+
     if dispo_vagas_moto > total_vagas_moto:
         dispo_vagas_moto = total_vagas_moto
 
@@ -95,7 +96,7 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
     if dispo_vagas_carro is None:
         dispo_vagas_carro = 0
 
-    if _terminal_id == 1:
+    if _terminal_id == '00000001':
         if tipo == 'moto':
             if dispo_vagas_moto == 0:
                 return False
@@ -127,7 +128,7 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
                                          where tag_id = (%s);", (_tag_id, ))
                 return True
 
-    if _terminal_id == 2:
+    if _terminal_id == '00000002':
         if tipo == 'moto':
             if dispo_vagas_moto == total_vagas_moto:
                 with psycopg2.connect(database=db_name,
@@ -172,61 +173,72 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
 
 
 def tagSearch(_tag_name):
+    from operator import add
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
     with psycopg2.connect(database=db_name, user=db_user) as conn_pg:
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("select id from occ_tag where name = (%s)\
-                             and active = 't';", (_tag_name,))
+                             and active = 't';", (_tag_name, ))
             _tag_id = conn_pgs.fetchone()
             if _tag_id is None:
+                print 'Tag:', _tag_name, 'sem cadastro'
                 return False
             else:
-                return _tag_id
+                return reduce(add, _tag_id)
 
 
-def getDadosMorador(_tag_id):
+def getMoradorID(_tag_id):
+    from operator import add
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
     with psycopg2.connect(database=db_name, user=db_user) as conn_pg:
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("select morador_id from occ_veiculos where tag_id = (%s)\
-                             and active = 't';", (_tag_id,))
+                             and active = 't';", (_tag_id, ))
             _morador_id = conn_pgs.fetchone()
             if _morador_id is None:
+                print 'Tag id', _tag_id, 'sem morador cadastrado'
                 return False
-            _morador_id = reduce(lambda x, y: x, conn_pgs.fetchone())
-
+            morador_id = reduce(add, _morador_id)
             conn_pgs.execute("select name from occ_morador where id = (%s)\
-                             and active = 't';", (_morador_id,))
-            _morador = reduce(lambda x, y: x, conn_pgs.fetchone())
+                             and active = 't';", (_morador_id, ))
+            morador = reduce(add, conn_pgs.fetchone())
+            return morador_id
 
-            conn_pgs.execute("select image from occ_morador where id = (%s)\
-                             and active = 't';", (_morador_id,))
-            _foto = conn_pgs.fetchone()
 
-            return {'0': _morador_id,
-                    '1': _foto,
-                    '2': _morador}
-
+def getMorador(_morador_id):
+    from operator import add
+    import  psycopg2.extensions
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+    with psycopg2.connect(database=db_name, user=db_user) as conn_pg:
+        with conn_pg.cursor() as conn_pgs:
+            conn_pgs.execute("select name from occ_morador where id = (%s)\
+                             and active = 't';", (_morador_id, ))
+            morador = reduce(add, conn_pgs.fetchone())
+            return morador
 
 def getPlaca(_tag_id):
+    from operator import add
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
     with psycopg2.connect(database=db_name, user=db_user) as conn_pg:
         with conn_pg.cursor() as conn_pgs:
-            conn_pgs.execute("select name from occ_veiculos where name = (%s)\
-                             and active = 't';", (_tag_id,))
+            conn_pgs.execute("select name from occ_veiculos where tag_id = (%s)\
+                             and active = 't';", (_tag_id, ))
             _placa = conn_pgs.fetchone()
             if _placa is None:
+                print 'Tag_id:', _tag_id, 'não registrado à veiculo'
                 return False
-            return reduce(lambda x, y: x, _placa)
+            return reduce(add, _placa)
 
 
 def getApto(_morador_id):
+    from operator import add
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
@@ -236,14 +248,16 @@ def getApto(_morador_id):
                              and active = 't';", (_morador_id,))
             _apto_id = conn_pgs.fetchone()
             if _apto_id is None:
+                print 'Morador id:', _morador_id, 'não tem apartamento'
                 return False
             conn_pgs.execute("select name from occ_apto where id = (%s);",
                              (_apto_id,))
             _apto = conn_pgs.fetchone()
-            return reduce(lambda x, y: x, _apto)
+            return reduce(add, _apto)
 
 
 def getSentido(_terminal_id):
+    from operator import add
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
@@ -254,7 +268,7 @@ def getSentido(_terminal_id):
             _sentido = conn_pgs.fetchone()
             if _sentido is None:
                 return False
-            return reduce(lambda x, y: x, _sentido)
+            return reduce(add, _sentido)
 
 
 def getAuth(_tag_name, _terminal_id):
@@ -263,40 +277,52 @@ def getAuth(_tag_name, _terminal_id):
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
 
     horario = datetime.strftime(datetime.now(), '%H:%M:%S - %d/%m/%Y')
-
+    status_tag = False
+    status_morador = False
+    status_placa = False
+    status_apto = False
+    status_sentido = False
+    vaga = False
     _tag_id = tagSearch(_tag_name)
     if _tag_id is False:
-        status_tag = 'TAG não cadastrado'
+        return False 
     else:
+        return True
+    """
         tag_id = _tag_id
         status_tag = True
-        _dadosmorador = getDadosMorador(_tag_id)
-        if _dadosmorador is False:
+        morador_id = getMoradorID(_tag_id)
+        if morador_id is False:
             status_morador = 'Morador não cadastrado'
+            return False
         else:
-            morador_id = _dadosmorador[0]
-            foto = _dadosmorador[1]
-            morador = _dadosmorador[2]
+            morador = getMorador(morador_id)
+            vaga = getVagasDispo(tag_id, morador_id, _terminal_id)
+            if vaga is False:
+                print morador
+                print 'Sem disponibilidade de vaga'
             status_morador = True
 
-        _placa = getPlaca(tag_id)
+        _placa = getPlaca(_tag_id)
         if _placa is False:
             status_placa = 'Veículo não cadastrado'
+            return False
         else:
             placa = _placa
             status_placa = True
 
-        _apto = getApto(tag_id)
+        _apto = getApto(morador_id)
         if _apto is False:
             status_apto = 'Apartamento não cadastrado'
+            return False
         else:
             apto = _apto
             status_apto = True
-        vaga = getVagasDispo(tag_id, morador_id, _terminal_id)
 
     _sentido = getSentido(_terminal_id)
     if _sentido is False:
         status_sentido = 'Terminal não cadastrado'
+        return False
     else:
         sentido = _sentido
         status_sentido = True
@@ -306,10 +332,10 @@ def getAuth(_tag_name, _terminal_id):
         with psycopg2.connect(database=db_name, user=db_user) as conn_pg:
             with conn_pg.cursor() as conn_pgs:
                 conn_pgs.execute("INSERT INTO occ_acesso \
-                                 (image, morador, apto, placa, \
+                                 (morador, apto, placa, \
                                   sentido, horario, status) \
-                                 VALUES (%s, %s, %s, %s, %s, %s, %s);",
-                                 (foto, morador, apto, placa,
+                                 VALUES (%s, %s, %s, %s, %s, %s);",
+                                 (morador, apto, placa,
                                   sentido, horario, 'OK'))
         return True
     else:
@@ -322,11 +348,11 @@ def getAuth(_tag_name, _terminal_id):
                                                   user=db_user) as conn_pg:
                                 with conn_pg.cursor() as conn_pgs:
                                     conn_pgs.execute("INSERT INTO occ_acesso \
-                                                     (sentido, image, morador,\
+                                                     (sentido, morador,\
                                                       placa, apto, horario, \
-                                                     status) VALUES (%s, %s, \
+                                                     status) VALUES (%s, \
                                                      %s, %s, %s, %s, %s);",
-                                                     (sentido, foto, morador,
+                                                     (sentido, morador,
                                                       placa, apto, horario,
                                                       'Sem vaga disponível'))
                             return False
@@ -335,11 +361,11 @@ def getAuth(_tag_name, _terminal_id):
                                                   user=db_user) as conn_pg:
                                 with conn_pg.cursor() as conn_pgs:
                                     conn_pgs.execute("INSERT INTO occ_acesso \
-                                                     (sentido, image, morador,\
+                                                     (sentido, morador,\
                                                       placa, apto, horario, \
-                                                     status) VALUES (%s, %s, \
+                                                     status) VALUES (%s, \
                                                      %s, %s, %s, %s, %s);",
-                                                     (sentido, foto, morador,
+                                                     (sentido, morador,
                                                       placa, 'Erro', horario,
                                                       status_apto))
                             return False
@@ -348,11 +374,11 @@ def getAuth(_tag_name, _terminal_id):
                                               user=db_user) as conn_pg:
                             with conn_pg.cursor() as conn_pgs:
                                 conn_pgs.execute("INSERT INTO occ_acesso \
-                                                 (sentido, image, morador,\
+                                                 (sentido, morador,\
                                                   placa, apto, horario, \
-                                                 status) VALUES (%s, %s, \
+                                                 status) VALUES (%s, \
                                                  %s, %s, %s, %s, %s);",
-                                                 (sentido, foto, morador,
+                                                 (sentido, morador,
                                                   'Erro', 'nc', horario,
                                                   status_placa))
                         return False
@@ -361,11 +387,11 @@ def getAuth(_tag_name, _terminal_id):
                                           user=db_user) as conn_pg:
                         with conn_pg.cursor() as conn_pgs:
                             conn_pgs.execute("INSERT INTO occ_acesso \
-                                             (sentido, image, morador,\
+                                             (sentido, morador,\
                                               placa, apto, horario, \
-                                             status) VALUES (%s, %s, \
+                                             status) VALUES (%s, \
                                              %s, %s, %s, %s, %s);",
-                                             (sentido, None, 'Erro',
+                                             (sentido, 'Erro',
                                               'nc', 'nc', horario,
                                               status_morador))
                     return False
@@ -374,11 +400,11 @@ def getAuth(_tag_name, _terminal_id):
                                       user=db_user) as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
                         conn_pgs.execute("INSERT INTO occ_acesso \
-                                         (sentido, image, morador,\
+                                         (sentido, morador,\
                                           placa, apto, horario, \
-                                         status) VALUES (%s, %s, \
+                                         status) VALUES (%s, \
                                          %s, %s, %s, %s, %s);",
-                                         ('Erro', None, 'nc',
+                                         ('Erro', 'nc',
                                           'nc', 'nc', horario,
                                           status_sentido))
                 return False
@@ -387,14 +413,15 @@ def getAuth(_tag_name, _terminal_id):
                                   user=db_user) as conn_pg:
                 with conn_pg.cursor() as conn_pgs:
                     conn_pgs.execute("INSERT INTO occ_acesso \
-                                     (sentido, image, morador,\
+                                     (sentido, morador,\
                                       placa, apto, horario, \
-                                     status) VALUES (%s, %s, \
+                                     status) VALUES (%s, \
                                      %s, %s, %s, %s, %s);",
-                                     ('Erro', None, 'nc',
+                                     ('Erro', 'nc',
                                       'nc', 'nc', horario,
                                       status_tag))
             return False
+        """
 
 
 def setTerminal(_terminal_id, _terminal_ip, _terminal_port):
@@ -409,6 +436,7 @@ def setTerminal(_terminal_id, _terminal_ip, _terminal_port):
 
 
 def getTerminalStatus(_addr):
+    from operator import add
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
@@ -416,7 +444,7 @@ def getTerminalStatus(_addr):
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("select terminal_status from occ_virdi where \
                              terminal_ip = (%s);", (_addr, ))
-            return reduce(lambda x, y: x, conn_pgs.fetchone())
+            return reduce(add, conn_pgs.fetchone())
 
 
 def getTerminalID(_addr):
@@ -427,7 +455,11 @@ def getTerminalID(_addr):
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("select terminal_id from occ_virdi where \
                              terminal_ip = (%s);", (_addr, ))
-            return conn_pgs.fetchone()
+            tid = conn_pgs.fetchone()
+            if tid is None:
+                return False
+            tid = reduce(lambda x, y: x + y, tid)
+            return tid
 
 
 def setTerminalStatus(_tid):

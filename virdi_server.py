@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
-import socket
 import binascii
+import socket
 from thread import start_new_thread
 from functions import vd_comms
 from functions import vd_dbconn
@@ -40,23 +40,22 @@ def clientthread(conn, _addr, _port):
             break
     # came out of loop
     conn.close()
+
+
 if __name__ == "__main__":
-    HOST = '172.19.254.11'
     PORT = 9870
+    HOST = '172.16.0.1'
     # now keep talking with the client
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    print 'Socket created'
-
     # Bind socket to local host and port
+    print 'Socket create complete'
     try:
         s.bind((HOST, PORT))
     except socket.error as msg:
         print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
         sys.exit()
-
     print 'Socket bind complete'
-
     # Start listening on socket
     s.listen(3)
     print 'Socket now listening'
@@ -70,3 +69,4 @@ if __name__ == "__main__":
         # second is the tuple of arguments to the function.
         start_new_thread(clientthread, (conn, ip, port))
     s.close()
+
