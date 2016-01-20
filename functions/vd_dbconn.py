@@ -2,7 +2,7 @@
 from datetime import datetime
 global db_name, db_user
 db_name = "reserva"
-db_user = "cezar"
+db_user = "e2i9"
 
 
 def setTotalVagas():
@@ -466,3 +466,4 @@ def setTerminalStatus(_tid):
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("update occ_virdi SET terminal_status = 'close' \
                              where terminal_id = %s;", (_tid, ))
+

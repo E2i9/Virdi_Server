@@ -43,7 +43,7 @@ def clientthread(conn, _addr, _port):
 
 
 if __name__ == "__main__":
-    HOST = '172.19.254.11'
+    HOST = '172.16.0.1'
     PORT = 9870
     # now keep talking with the client
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
