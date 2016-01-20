@@ -2,7 +2,7 @@
 from datetime import datetime
 global db_name, db_user
 db_name = "reserva"
-db_user = "cezar"
+db_user = "e2i9"
 
 
 def setTotalVagas():
