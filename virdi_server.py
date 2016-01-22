@@ -31,7 +31,8 @@ def clientthread(conn, addr, port):
                     conn.sendall(replay)
             else:
                 if opt == '1b':
-                    tag_code = binascii.unhexlify(hex_data[64:66]).decode()
+                    tag_code = binascii.unhexlify(hex_data[64:68]).decode()
+                    print tag_code
                     if tag_code == 'EE':
                         replay = vd_comms.options[opt](hex_data)
                         if replay is not None:
