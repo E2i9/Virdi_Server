@@ -2,7 +2,7 @@
 from datetime import datetime
 global db_name, db_user
 db_name = "reserva"
-db_user = "e2i9"
+db_user = "cezar"
 
 
 def setTotalVagas():
@@ -445,6 +445,7 @@ def getTerminalID(_addr):
 
 
 def setTerminalStatus(_tid):
+    from operator import add
     import psycopg2.extensions
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
@@ -452,4 +453,15 @@ def setTerminalStatus(_tid):
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("update occ_virdi SET terminal_status = 'close' \
                              where terminal_id = %s;", (_tid, ))
+            conn_pgs.execute("select terminal_manual from occ_virdi where \
+                             terminal_id = %s;", (_tid, ))
+            t = conn_pgs.fetchone()
+            if t is None:
+                t = 1
+                conn_pgs.execute("update occ_virdi SET terminal_manual = %s;",
+                                 (t, ))
+            else:
+                t = reduce(add, t) + 1
+                conn_pgs.execute("update occ_virdi SET terminal_manual = %s;",
+                                 (t,))
 

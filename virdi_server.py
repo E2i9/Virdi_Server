@@ -32,7 +32,7 @@ def clientthread(conn, addr, port):
             else:
                 if opt == '1b':
                     tag_code = binascii.unhexlify(hex_data[64:68]).decode()
-                    print tag_code
+                    # print tag_code
                     if tag_code == 'EE':
                         replay = vd_comms.options[opt](hex_data)
                         if replay is not None:
@@ -58,7 +58,7 @@ def clientthread(conn, addr, port):
 
 
 if __name__ == "__main__":
-    HOST = '172.16.0.1'
+    HOST = ''
     PORT = 9870
     # now keep talking with the client
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
