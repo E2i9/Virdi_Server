@@ -240,6 +240,32 @@ def respBringUserAuthInfo(hex_data):
     return replay
 
 
+def respBringUserAuthInfoBlock(hex_data):
+    # print 'Buscando informação de autenticação de usuário \
+    # (Terminal -> Servidor) 0x1b'
+    """
+    Rotina para envio de pacote de autenticação do usuário
+    (Terminal -> Servidor) código do comando 0x1b
+    :Return: Datagrama para envio pelo servidor
+    :Parameters: Pacote binário no formato Hexadecimal e o
+    endereço IP do servidor
+    """
+    GlobalCodes()
+    start = hex_data[0:2]
+    command = hex_data[2:4]
+    cid = hex_data[4:8]
+    tid = hex_data[8:16]
+    param1 = '0x00000000'
+    param2 = '0x00000000'
+    param3 = '0x0108000000000000'
+    errorcode = ERROR_3004
+    extradata = '0x0800'
+    data = vd_packs.TIME_INFO()
+    replay = vd_packs.comPackC02(start, command, cid, tid, param1, param2,
+                                 param3, errorcode, extradata, data)
+    return replay
+
+
 def respServerAuth(hex_data):
     # print "Autenticação no Servidor \
     # (Terminal -> Servidor) 0x1c"

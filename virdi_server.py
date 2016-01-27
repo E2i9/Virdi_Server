@@ -8,7 +8,7 @@ from functions import vd_dbconn
 
 
 # Function for handling connections. This will be used to create threads
-def clientthread(conn, _addr, _port):
+def clientthread(conn, addr, port):
     # infinite loop so that function do not terminate and thread do not end.
     while True:
 
@@ -25,16 +25,31 @@ def clientthread(conn, _addr, _port):
             if opt == '01':
                 x = hex_data[8:16]
                 tid = str(x[6:8] + x[4:6] + x[2:4] + x[0:2])
-                vd_dbconn.setTerminal(tid, _addr, _port)
+                vd_dbconn.setTerminal(tid, addr, port)
+                replay = vd_comms.options[opt](hex_data)
+                if replay is not None:
+                    conn.sendall(replay)
+            else:
+                if opt == '1b':
+                    tag_code = binascii.unhexlify(hex_data[64:68]).decode()
+                    print tag_code
+                    if tag_code == 'EE':
+                        replay = vd_comms.options[opt](hex_data)
+                        if replay is not None:
+                            conn.sendall(replay)
+                    else:
+                        replay = vd_comms.respBringUserAuthInfoBlock(hex_data)
+                        if replay is not None:
+                            conn.sendall(replay)
+                else:
+                    replay = vd_comms.options[opt](hex_data)
+                    if replay is not None:
+                        conn.sendall(replay)
 
-            if vd_dbconn.getTerminalStatus(_addr) == 'open':
-                _tid = vd_dbconn.getTerminalID(_addr)
-                vd_dbconn.setTerminalStatus(_tid)
-                conn.sendall(vd_comms.setGateOpen(_tid))
-
-            replay = vd_comms.options[opt](hex_data)
-            if replay is not None:
-                conn.sendall(replay)
+            if vd_dbconn.getTerminalStatus(addr) == 'open':
+                tid = vd_dbconn.getTerminalID(addr)
+                vd_dbconn.setTerminalStatus(tid)
+                conn.sendall(vd_comms.setGateOpen(tid))
 
         except KeyboardInterrupt:
             break
