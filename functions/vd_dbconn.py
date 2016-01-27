@@ -464,3 +464,4 @@ def setTerminalStatus(_tid):
                 t = reduce(add, t) + 1
                 conn_pgs.execute("update occ_virdi SET terminal_manual = %s;",
                                  (t,))
+
