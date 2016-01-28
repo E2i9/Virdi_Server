@@ -109,7 +109,8 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
             if dispo_vagas_moto == 0:
                 return False
             else:
-                # print 'D Vagas moto', dispo_vagas_moto, '->', dispo_vagas_moto - 1
+                # print 'D Vagas moto', dispo_vagas_moto, '->',
+                # dispo_vagas_moto - 1
                 dispo_vagas_moto -= 1
                 with psycopg2.connect(database=db_name,
                                       user=db_user) as conn_pg:
@@ -125,7 +126,8 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
             if dispo_vagas_carro == 0:
                 return False
             else:
-                # print 'D Vagas carro', dispo_vagas_carro, '->', dispo_vagas_carro - 1
+                # print 'D Vagas carro', dispo_vagas_carro, '->',
+                # dispo_vagas_carro - 1
                 dispo_vagas_carro -= 1
                 with psycopg2.connect(database=db_name,
                                       user=db_user) as conn_pg:
@@ -148,7 +150,8 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
                                          where tag_id = (%s);", (_tag_id, ))
                 return True
             else:
-                # print 'D Vagas moto', dispo_vagas_moto, '->', dispo_vagas_moto + 1
+                # print 'D Vagas moto', dispo_vagas_moto, '->', dispo_vagas_
+                # moto + 1
                 dispo_vagas_moto += 1
                 with psycopg2.connect(database=db_name,
                                       user=db_user) as conn_pg:
@@ -170,7 +173,8 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
                                          where tag_id = (%s);", (_tag_id, ))
                 return True
             else:
-                # print 'D Vagas carro', dispo_vagas_carro, '->', dispo_vagas_carro + 1
+                # print 'D Vagas carro', dispo_vagas_carro, '->',
+                # dispo_vagas_carro + 1
                 dispo_vagas_carro += 1
                 with psycopg2.connect(database=db_name,
                                       user=db_user) as conn_pg:
@@ -249,6 +253,7 @@ def getPlacaID(_tag_id):
                 return False
             # print 'PLACA:', reduce(add, _placa_id)
             return reduce(add, _placa_id)
+
 
 def getPlaca(_placa_id):
     from operator import add
@@ -361,7 +366,7 @@ def getAuth(_tag_name, _terminal_id):
                                cadastrada'
                 # print 'Status Placa:', status_placa
                 return False
-            else: 
+            else:
                 _placa = getPlaca(placa_id)
                 if _placa is False:
                     status_placa = 'Veículo associado ao TAG não tem placa \
@@ -369,7 +374,7 @@ def getAuth(_tag_name, _terminal_id):
                     # print 'Status Placa:', status_placa
                     return False
                 else:
-                    placa = _placa
+                    # placa = _placa
                     status_placa = True
                     # print 'Status Placa:', status_placa
 
@@ -392,7 +397,7 @@ def getAuth(_tag_name, _terminal_id):
                 status_vaga = vaga
                 # print 'Status Vaga:', status_vaga
 
-            morador = getMorador(morador_id)
+            # morador = getMorador(morador_id)
             status_morador = True
             # print 'Status Morador:', status_morador
 
@@ -445,23 +450,17 @@ def getTerminalID(_addr):
 
 
 def setTerminalStatus(_tid):
-    from operator import add
     import psycopg2.extensions
+    sentido = getSentido(_tid)
+    horario = datetime.strftime(datetime.now(), '%Y.%m.%d - %H:%M:%S')
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
     with psycopg2.connect(database=db_name, user=db_user) as conn_pg:
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("update occ_virdi SET terminal_status = 'close' \
                              where terminal_id = %s;", (_tid, ))
-            conn_pgs.execute("select terminal_manual from occ_virdi where \
-                             terminal_id = %s;", (_tid, ))
-            t = conn_pgs.fetchone()
-            if t is None:
-                t = 1
-                conn_pgs.execute("update occ_virdi SET terminal_manual = %s;",
-                                 (t, ))
-            else:
-                t = reduce(add, t) + 1
-                conn_pgs.execute("update occ_virdi SET terminal_manual = %s;",
-                                 (t,))
-
+            conn_pgs.execute("INSERT INTO occ_controle_acesso \
+                             (horario, sentido, morador,\
+                              placa, status) VALUES (%s, \
+                              %s, Null, Null, %s);",
+                             (horario, sentido, 'Abertura manual'))
