@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 global db_name, db_user
-db_name = "reserva"
+db_name = "reserva_eco"
 db_user = "cezar"
 
 
@@ -19,41 +19,41 @@ def setTotalVagas():
                 _total_tag_vaga_moto = 0
                 _total_tag_vaga_carro = 0
                 with conn_pg.cursor() as conn_pgs2:
-                        conn_pgs2.execute("select tag_id from occ_veiculos \
+                    conn_pgs2.execute("select tag_id from occ_veiculos \
                                           where active = 't' and \
                                           morador_id = (%s);", (_morador_id, ))
-                        _tag_ids = conn_pgs2.fetchall()
-                        for _tag_id in _tag_ids:
-                            conn_pgs2.execute("select tipo from occ_veiculos \
+                    _tag_ids = conn_pgs2.fetchall()
+                    for _tag_id in _tag_ids:
+                        conn_pgs2.execute("select tipo from occ_veiculos \
                                               where active = 't' and \
                                               tag_id = (%s);", (_tag_id, ))
-                            _tag_tipo = reduce(add, conn_pgs2.fetchone())
-                            if _tag_tipo == 'moto':
-                                conn_pgs2.execute("select count(*) as records \
+                        _tag_tipo = reduce(add, conn_pgs2.fetchone())
+                        if _tag_tipo == 'moto':
+                            conn_pgs2.execute("select count(*) as records \
                                                   from occ_tag_moto_rel where \
                                                   tag_ids = (%s);", (_tag_id, )
-                                                  )
-                                _tag_vaga_moto = reduce(add,
-                                                        conn_pgs2.fetchone())
-                                if _tag_vaga_moto > _total_tag_vaga_moto:
-                                        _total_tag_vaga_moto = _tag_vaga_moto
-                            if _tag_tipo == 'carro':
-                                conn_pgs2.execute("select count(*) as records \
+                                              )
+                            _tag_vaga_moto = reduce(add,
+                                                    conn_pgs2.fetchone())
+                            if _tag_vaga_moto > _total_tag_vaga_moto:
+                                _total_tag_vaga_moto = _tag_vaga_moto
+                        if _tag_tipo == 'carro':
+                            conn_pgs2.execute("select count(*) as records \
                                                   from occ_tag_carro_rel where\
                                                   tag_ids = (%s);", (_tag_id, )
-                                                  )
-                                _tag_vaga_carro = reduce(add,
-                                                         conn_pgs2.fetchone())
-                                if _tag_vaga_carro > _total_tag_vaga_carro:
-                                        _total_tag_vaga_carro = _tag_vaga_carro
+                                              )
+                            _tag_vaga_carro = reduce(add,
+                                                     conn_pgs2.fetchone())
+                            if _tag_vaga_carro > _total_tag_vaga_carro:
+                                _total_tag_vaga_carro = _tag_vaga_carro
                 with conn_pg.cursor() as conn_pgs3:
-                        conn_pgs3.execute("update occ_morador SET \
+                    conn_pgs3.execute("update occ_morador SET \
                                           total_vagas_carro = (%s), \
                                           total_vagas_moto = (%s) \
                                           where id = (%s);",
-                                          (_total_tag_vaga_carro,
-                                           _total_tag_vaga_moto,
-                                           _morador_id, ))
+                                      (_total_tag_vaga_carro,
+                                       _total_tag_vaga_moto,
+                                       _morador_id, ))
 
 
 def getVagasDispo(_tag_id, _morador_id, _terminal_id):
@@ -423,6 +423,7 @@ def setTerminal(_terminal_id, _terminal_ip, _terminal_port):
             conn_pgs.execute("update occ_virdi SET terminal_ip = (%s),\
                              terminal_port = (%s) where terminal_id = %s;",
                              (_terminal_ip, _terminal_port, _terminal_id, ))
+            print _terminal_ip, _terminal_port, _terminal_id
 
 
 def getTerminalStatus(_addr):
@@ -451,16 +452,9 @@ def getTerminalID(_addr):
 
 def setTerminalStatus(_tid):
     import psycopg2.extensions
-    sentido = getSentido(_tid)
-    horario = datetime.strftime(datetime.now(), '%Y.%m.%d - %H:%M:%S')
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
     with psycopg2.connect(database=db_name, user=db_user) as conn_pg:
         with conn_pg.cursor() as conn_pgs:
             conn_pgs.execute("update occ_virdi SET terminal_status = 'close' \
                              where terminal_id = %s;", (_tid, ))
-            conn_pgs.execute("INSERT INTO occ_controle_acesso \
-                             (horario, sentido, morador,\
-                              placa, status) VALUES (%s, \
-                              %s, Null, Null, %s);",
-                             (horario, sentido, 'Abertura manual'))

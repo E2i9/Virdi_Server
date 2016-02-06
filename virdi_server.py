@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import sys
-import socket
-import binascii
 from thread import start_new_thread
+import binascii
+import socket
+import sys
+
 from functions import vd_comms
 from functions import vd_dbconn
 
@@ -58,7 +59,7 @@ def clientthread(conn, addr, port):
 
 
 if __name__ == "__main__":
-    HOST = '172.16.0.1'
+    HOST = '172.19.254.11'
     PORT = 9870
     # now keep talking with the client
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
