@@ -71,6 +71,14 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
                 return False
             else:
                 tipo = reduce(add, tipo)
+            conn_pgs.execute("select status from occ_veiculos where\
+                             tag_id = (%s);", (_tag_id, ))
+            status = conn_pgs.fetchone()
+            if status is None:
+                return False
+            else:
+                status = reduce(add, status)
+
             conn_pgs.execute("select total_vagas_moto from occ_morador where\
                              id = (%s);", (_morador_id, ))
             total_vagas_moto = reduce(add, conn_pgs.fetchone())
@@ -106,12 +114,14 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
 
     if sentido == 'in':
         if tipo == 'moto':
-            if dispo_vagas_moto == 0:
+            if dispo_vagas_moto == 0 and status == 'fora':
                 return False
             else:
                 # print 'D Vagas moto', dispo_vagas_moto, '->',
                 # dispo_vagas_moto - 1
                 dispo_vagas_moto -= 1
+                if dispo_vagas_moto < 0:
+                    dispo_vagas_moto = 0
                 with psycopg2.connect(database=db_name,
                                       user=db_user) as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
@@ -123,12 +133,14 @@ def getVagasDispo(_tag_id, _morador_id, _terminal_id):
                                          where tag_id = (%s);", (_tag_id, ))
                 return True
         if tipo == 'carro':
-            if dispo_vagas_carro == 0:
+            if dispo_vagas_carro == 0 and status == 'fora':
                 return False
             else:
                 # print 'D Vagas carro', dispo_vagas_carro, '->',
                 # dispo_vagas_carro - 1
                 dispo_vagas_carro -= 1
+                if dispo_vagas_carro < 0:
+                    dispo_vagas_carro = 0
                 with psycopg2.connect(database=db_name,
                                       user=db_user) as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
@@ -310,7 +322,7 @@ def getAuth(_tag_name, _terminal_id):
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
 
     status_tag = False
-    horario = datetime.strftime(datetime.now(), '%Y.%m.%d - %H:%M:%S')
+    horario = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
     status_sentido = False
     status_morador = False
     status_placa = False
@@ -328,15 +340,15 @@ def getAuth(_tag_name, _terminal_id):
 
     _tag_id = tagSearch(_tag_name)
     if _tag_id is False:
-        status_tag = 'TAG não cadastrado'
+        status_tag = 'Entrada não autorizada'
         # print 'Status TAG:', status_tag
         with psycopg2.connect(database=db_name,
                               user=db_user) as conn_pg:
             with conn_pg.cursor() as conn_pgs:
                 conn_pgs.execute("INSERT INTO occ_controle_acesso \
                                  (horario, sentido, morador,\
-                                 placa, status) VALUES (%s, \
-                                 %s, Null, Null, %s);",
+                                 apto_id, placa, status) VALUES (%s, \
+                                 %s, Null, Null, Null %s);",
                                  (horario, sentido,
                                   status_tag))
         return False
@@ -347,30 +359,30 @@ def getAuth(_tag_name, _terminal_id):
         # print 'Status TAG:', status_tag
         morador_id = getMoradorID(tag_id)
         if morador_id is False:
-            status_morador = 'TAG não associado a morador'
+            status_morador = 'Entrada não autorizada'
             # print 'Status Morador ID:', status_morador
             with psycopg2.connect(database=db_name,
                                   user=db_user) as conn_pg:
                 with conn_pg.cursor() as conn_pgs:
                     conn_pgs.execute("INSERT INTO occ_controle_acesso \
                                      (horario, sentido, morador,\
-                                     placa, status) VALUES (%s, \
-                                     %s, Null, Null, %s);",
+                                     apto_id, placa, status) VALUES (%s, \
+                                     %s, Null, Null, Null, %s);",
                                      (horario, sentido,
                                       status_morador))
             return False
         else:
+            status_morador = True
+            # print 'Status Morador:', status_morador
             placa_id = getPlacaID(tag_id)
             if placa_id is False:
-                status_placa = 'Veículo associado ao TAG não tem placa \
-                               cadastrada'
+                status_placa = 'Entrada não autorizada'
                 # print 'Status Placa:', status_placa
                 return False
             else:
                 _placa = getPlaca(placa_id)
                 if _placa is False:
-                    status_placa = 'Veículo associado ao TAG não tem placa \
-                                   cadastrada'
+                    status_placa = 'Entrada não autorizada'
                     # print 'Status Placa:', status_placa
                     return False
                 else:
@@ -379,6 +391,7 @@ def getAuth(_tag_name, _terminal_id):
                     # print 'Status Placa:', status_placa
 
             vaga = getVagasDispo(tag_id, morador_id, _terminal_id)
+            apto_id = getApto(morador_id)
 
             if vaga is False:
                 status_vaga = 'Morador já utilizou todas as vagas disponíveis'
@@ -388,18 +401,14 @@ def getAuth(_tag_name, _terminal_id):
                     with conn_pg.cursor() as conn_pgs:
                         conn_pgs.execute("INSERT INTO occ_controle_acesso \
                                          (horario, sentido, morador,\
-                                         placa, status) VALUES (%s, \
-                                         %s, %s, %s, %s);",
+                                         apto_id, placa, status) VALUES (%s, \
+                                         %s, %s, %s, %s, %s);",
                                          (horario, sentido, morador_id,
-                                          placa_id, status_vaga))
+                                          apto_id, placa_id, status_vaga))
                 return False
             else:
                 status_vaga = vaga
                 # print 'Status Vaga:', status_vaga
-
-            # morador = getMorador(morador_id)
-            status_morador = True
-            # print 'Status Morador:', status_morador
 
     if ((status_tag and status_sentido and status_morador and
          status_placa and status_vaga)):
@@ -407,10 +416,10 @@ def getAuth(_tag_name, _terminal_id):
             with conn_pg.cursor() as conn_pgs:
                 conn_pgs.execute("INSERT INTO occ_controle_acesso \
                                  (horario, sentido, morador,\
-                                 placa, status) VALUES (%s, \
-                                 %s, %s, %s, %s);",
+                                 apto_id, placa, status) VALUES (%s, \
+                                 %s, %s, %s, %s, %s);",
                                  (horario, sentido, morador_id,
-                                  placa_id, 'Ok'))
+                                  apto_id, placa_id, 'Ok'))
         return True
 
 
