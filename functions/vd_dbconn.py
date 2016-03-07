@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 global db_name, db_user
-db_name = "reserva_eco"
-db_user = "cezar"
+db_name = "reserva"
+db_user = "e2i9"
 
 
 def setTotalVagas():
@@ -295,10 +295,7 @@ def getApto(_morador_id):
             _apto_id = conn_pgs.fetchone()
             if _apto_id is None:
                 return False
-            conn_pgs.execute("select name from occ_apto where id = (%s);",
-                             (_apto_id,))
-            _apto = conn_pgs.fetchone()
-            return reduce(add, _apto)
+            return reduce(add, _apto_id)
 
 
 def getSentido(_terminal_id):
