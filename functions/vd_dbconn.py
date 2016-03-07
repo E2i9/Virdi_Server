@@ -327,7 +327,7 @@ def getAuth(_tag_name, _terminal_id):
 
     _sentido = getSentido(_terminal_id)
     if _sentido is False:
-        status_sentido = 'Terminal não cadastrado'
+        status_sentido = u'Terminal não cadastrado'
         # print 'Status Terminal:', status_sentido
         return False
     else:
@@ -337,17 +337,16 @@ def getAuth(_tag_name, _terminal_id):
 
     _tag_id = tagSearch(_tag_name)
     if _tag_id is False:
-        status_tag = 'Entrada não autorizada'
+        status_tag = u'Acesso não autorizado'
         # print 'Status TAG:', status_tag
         with psycopg2.connect(database=db_name,
                               user=db_user) as conn_pg:
             with conn_pg.cursor() as conn_pgs:
                 conn_pgs.execute("INSERT INTO occ_controle_acesso \
-                                 (horario, sentido, morador,\
+                                 (horario, sentido, morador, \
                                  apto_id, placa, status) VALUES (%s, \
-                                 %s, Null, Null, Null %s);",
-                                 (horario, sentido,
-                                  status_tag))
+                                 %s, Null, Null, Null, %s);",
+                                 (horario, sentido, status_tag))
         return False
     else:
         # return True
@@ -356,13 +355,13 @@ def getAuth(_tag_name, _terminal_id):
         # print 'Status TAG:', status_tag
         morador_id = getMoradorID(tag_id)
         if morador_id is False:
-            status_morador = 'Entrada não autorizada'
+            status_morador = 'Acesso não autorizado'
             # print 'Status Morador ID:', status_morador
             with psycopg2.connect(database=db_name,
                                   user=db_user) as conn_pg:
                 with conn_pg.cursor() as conn_pgs:
                     conn_pgs.execute("INSERT INTO occ_controle_acesso \
-                                     (horario, sentido, morador,\
+                                     (horario, sentido, morador, \
                                      apto_id, placa, status) VALUES (%s, \
                                      %s, Null, Null, Null, %s);",
                                      (horario, sentido,
@@ -373,13 +372,13 @@ def getAuth(_tag_name, _terminal_id):
             # print 'Status Morador:', status_morador
             placa_id = getPlacaID(tag_id)
             if placa_id is False:
-                status_placa = 'Entrada não autorizada'
+                status_placa = 'Acesso não autorizado'
                 # print 'Status Placa:', status_placa
                 return False
             else:
                 _placa = getPlaca(placa_id)
                 if _placa is False:
-                    status_placa = 'Entrada não autorizada'
+                    status_placa = 'Acesso não autorizado'
                     # print 'Status Placa:', status_placa
                     return False
                 else:
@@ -397,7 +396,7 @@ def getAuth(_tag_name, _terminal_id):
                                       user=db_user) as conn_pg:
                     with conn_pg.cursor() as conn_pgs:
                         conn_pgs.execute("INSERT INTO occ_controle_acesso \
-                                         (horario, sentido, morador,\
+                                         (horario, sentido, morador, \
                                          apto_id, placa, status) VALUES (%s, \
                                          %s, %s, %s, %s, %s);",
                                          (horario, sentido, morador_id,
@@ -412,7 +411,7 @@ def getAuth(_tag_name, _terminal_id):
         with psycopg2.connect(database=db_name, user=db_user) as conn_pg:
             with conn_pg.cursor() as conn_pgs:
                 conn_pgs.execute("INSERT INTO occ_controle_acesso \
-                                 (horario, sentido, morador,\
+                                 (horario, sentido, morador, \
                                  apto_id, placa, status) VALUES (%s, \
                                  %s, %s, %s, %s, %s);",
                                  (horario, sentido, morador_id,
