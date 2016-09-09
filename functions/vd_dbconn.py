@@ -337,7 +337,7 @@ def getAuth(_tag_name, _terminal_id):
 
     _tag_id = tagSearch(_tag_name)
     if _tag_id is False:
-        status_tag = u'Acesso não autorizado'
+        status_tag = u'Acesso não autorizado %s' % _tag_name
         # print 'Status TAG:', status_tag
         with psycopg2.connect(database=db_name,
                               user=db_user) as conn_pg:
