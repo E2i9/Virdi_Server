@@ -324,6 +324,7 @@ def getAuth(_tag_name, _terminal_id):
     status_morador = False
     status_placa = False
     status_vaga = False
+    status_apt = False
 
     _sentido = getSentido(_terminal_id)
     if _sentido is False:
@@ -355,7 +356,7 @@ def getAuth(_tag_name, _terminal_id):
         # print 'Status TAG:', status_tag
         morador_id = getMoradorID(tag_id)
         if morador_id is False:
-            status_morador = 'Acesso não autorizado'
+            status_morador = u'Acesso não autorizado %s' % _tag_name
             # print 'Status Morador ID:', status_morador
             with psycopg2.connect(database=db_name,
                                   user=db_user) as conn_pg:
@@ -372,13 +373,13 @@ def getAuth(_tag_name, _terminal_id):
             # print 'Status Morador:', status_morador
             placa_id = getPlacaID(tag_id)
             if placa_id is False:
-                status_placa = 'Acesso não autorizado'
+                status_placa = u'Acesso não autorizado %s' % _tag_name
                 # print 'Status Placa:', status_placa
                 return False
             else:
                 _placa = getPlaca(placa_id)
                 if _placa is False:
-                    status_placa = 'Acesso não autorizado'
+                    status_placa = u'Acesso não autorizado %s' % _tag_name
                     # print 'Status Placa:', status_placa
                     return False
                 else:
@@ -388,9 +389,9 @@ def getAuth(_tag_name, _terminal_id):
 
             vaga = getVagasDispo(tag_id, morador_id, _terminal_id)
             apto_id = getApto(morador_id)
-
+            
             if vaga is False:
-                status_vaga = 'Morador já utilizou todas as vagas disponíveis'
+                status_vaga = u'Morador já utilizou todas as vagas disponíveis'
                 # print 'Status Vaga:', status_vaga
                 with psycopg2.connect(database=db_name,
                                       user=db_user) as conn_pg:
